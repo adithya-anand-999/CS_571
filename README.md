@@ -1,4 +1,4 @@
-# Housing Prices in Major US Cities Over Time
+# Housing Prices in Major US Cities between 2000Q1-2010Q2
 
 ## Authors
 Adithya Anand, Blair Huang, Isabella Marino
@@ -8,7 +8,7 @@ As graduation nears, housing and its associated costs become more and more relev
 
 Our data is sourced from the Federal Housing Financial Agency (FHFA). They introduce themselves as: 
 
-“an independent agency established by the Housing and Economic Recovery Act of 2008 (HERA) and is responsible for the effective supervision, regulation, and housing mission oversight of the Federal National Mortgage Association (Fannie Mae), the Federal Home Loan Mortgage Corporation (Freddie Mac), and the Federal Home Loan Bank System…The Agency's mission is to ensure that Fannie Mae and Freddie Mac (the Enterprises) and the FHLBanks (together, "the regulated entities") fulfill their mission by operating in a safe and sound manner to serve as a reliable source of liquidity and funding for housing finance and community investment. Since 2008, FHFA has also served as conservator of Fannie Mae and Freddie Mac.”
+> “an independent agency established by the Housing and Economic Recovery Act of 2008 (HERA) and is responsible for the effective supervision, regulation, and housing mission oversight of the Federal National Mortgage Association (Fannie Mae), the Federal Home Loan Mortgage Corporation (Freddie Mac), and the Federal Home Loan Bank System…The Agency's mission is to ensure that Fannie Mae and Freddie Mac (the Enterprises) and the FHLBanks (together, "the regulated entities") fulfill their mission by operating in a safe and sound manner to serve as a reliable source of liquidity and funding for housing finance and community investment. Since 2008, FHFA has also served as conservator of Fannie Mae and Freddie Mac.”
 
 We will be using their House Price Index Datasets as the backbone of our visualization. The House Price Index (HPI) can be seen as an economic indicator of our current economy. HPI “[measures] changes in single-family home values based on data that extend back to the mid-1970s from all 50 states and over 400 American cities.” It is “a weighted, repeat-sales index, meaning that it measures average price changes in repeat sales or refinancings on the same properties.” This information is obtained by the FHFA through “reviewing repeat mortgage transactions on single-family properties whose mortgages have been purchased or securitized by Fannie Mae or Freddie Mac since January 1975.” HPI provides a good estimate on mortgage defaults and general housing affordability.
 
