@@ -22,6 +22,29 @@ async function start() {
     // Load in our json data
     await loadData();
 
+    // Create an svg to hold the map
+    let svg = d3.select(".map-div").append("svg")  
+                                   .attr("id", "map-svg")
+                                   .attr("height", MAP_HEIGHT)
+                                   .attr("width", MAP_WIDTH);
+
+    // Convert spherical coordinates to 2D cooordinates 
+    let projection = d3.geoAlbersUsa()
+        .translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]) // this centers the map in our SVG element
+        .scale([1300]); // this specifies how much to zoom
+    
+    // Convert the projected lat/lon coordinates into an SVG path string
+    let path = d3.geoPath()
+                 .projection(projection);
+    
+    // Create states
+    let states = svg.selectAll(".state")
+    states.data(PATH_DATA.features).enter()
+                                   .append("path")
+                                   .attr("class", "state")
+                                   .attr("d", path)
+                                   .attr("id", d => d.properties.name);                                 
+
 }
 
 // Helper for loading in json and initializing our dictionaries
@@ -45,4 +68,5 @@ async function loadData() {
     await d3.json("./datasets/jsonFiles/quarterlyStateData.json").then(data => populateDictionary(data, QUARTERLY_STATE_DATA));
     // TODO: Add city data parsing here
 }
+
 
