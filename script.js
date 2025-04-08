@@ -43,7 +43,8 @@ async function start() {
                                    .append("path")
                                    .attr("class", "state")
                                    .attr("d", path)
-                                   .attr("id", d => d.properties.name);                                 
+                                   .attr("id", d => d.properties.name)
+                                   .on("click", stateCard);
 
 }
 
@@ -70,3 +71,8 @@ async function loadData() {
 }
 
 
+// TODO: PLACEHOLDER
+function stateCard(event, d) { 
+    curState = d.properties.name;
+    alert(curState); 
+}
