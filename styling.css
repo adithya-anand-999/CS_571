@@ -1,0 +1,16 @@
+path {
+    fill: none;
+    stroke-width: 1px;
+    stroke: #222;
+    pointer-events: visibleFill;
+}
+
+/* Styling for each state */
+.state {
+    fill: none;
+}
+
+/* Effect upon hovering a state (TEMP SETTINGS)*/
+.state:hover {
+    fill:rgb(158, 208, 239)
+}
