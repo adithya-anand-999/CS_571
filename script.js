@@ -6,7 +6,7 @@ const MAP_WIDTH = 1400;
 let PATH_DATA;
 
 // Global dictionaries for our data
-// TODO: ADD dictionaries for the other data
+// TODO: Add dictionaries for the other data
 let ANNUAL_STATE_DATA = {};
 let QUARTERLY_STATE_DATA = {};
 
@@ -64,15 +64,26 @@ async function loadData() {
     }
 
     // Parses json data
-    await d3.json("./datasets/us-states.json").then(data => PATH_DATA = data);
+    await d3.json("./datasets/jsonFiles/us-states.json").then(data => PATH_DATA = data);
     await d3.json("./datasets/jsonFiles/annualStateData.json").then(data => populateDictionary(data, ANNUAL_STATE_DATA));
     await d3.json("./datasets/jsonFiles/quarterlyStateData.json").then(data => populateDictionary(data, QUARTERLY_STATE_DATA));
     // TODO: Add city data parsing here
 }
 
 
-// TODO: PLACEHOLDER
+// PLACEHOLDER: Currently helps show functionality of code
 function stateCard(event, d) { 
     curState = d.properties.name;
     alert(curState); 
+
+    // Open console to see structure of dictionarys
+    console.log('Annual State Data:\n');
+    console.log(ANNUAL_STATE_DATA);
+
+    console.log('Quarterly State Data:\n'); 
+    console.log(QUARTERLY_STATE_DATA);
+
+    // Example usage of a dictionary given a clicked state
+    console.log(curState + "'s avg house price over the years:");
+    ANNUAL_STATE_DATA[curState].forEach(instance => console.log(instance['Year'] + ': ' + instance['Average Price']));
 }
