@@ -4,7 +4,7 @@ from datetime import datetime
 import googlemaps
 import time
 
-API_KEY = "AIzaSyA-IpwBwpFFI27P8I8PYbaogYjGToKfbL4"
+API_KEY = "#################"
 
 # read in csv metro data file
 metro_data = pd.read_csv('./datasets/metroData/metro_quarter_hpi.csv', header=2)
