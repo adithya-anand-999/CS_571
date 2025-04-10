@@ -15,11 +15,14 @@ clean_metro_data = clean_metro_data.reset_index(drop=True) # after dropping rows
 def extract_states(state_str):
     states = state_str.split(" ")[0].split('-')
     if 'DC' in states:
-        return tuple(['DC']) 
-    return tuple(states)
+        return ['DC']
+    return states
 split_names = clean_metro_data['Metro_name'].str.split(', ')
 clean_metro_data['Metro_name'] = split_names.str[0]
 clean_metro_data['State'] = split_names.str[1].apply(extract_states)
+
+# duplicate rows for each state a metro appearers in
+clean_metro_data = clean_metro_data.explode('State')
 
 # Move 'state' just before 'metro_name'
 cols = clean_metro_data.columns.tolist()
