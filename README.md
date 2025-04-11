@@ -3,6 +3,11 @@
 ## Authors
 Adithya Anand, Blair Huang, Isabella Marino
 
+## Instructions on how to start and find our code
+To start our code you navigate to the top directory of our GitHub repo to find the website.html file. Then you start website.html using live server. From here you can view the output of all the code we have worked on.  
+
+All our code to clean the datasets are found across 2 python files. These are found in files ./datasets/metroData/metro_data_pre_processing.py and ./datasets/stateData/stateDataPreProcessing.py
+
 ## Background and Motivation
 We were initially motivated to do this project because of the mercurial nature of the housing market, especially as recent politics unfold. At the same time, the datasets we are working with – HPI indices and average housing prices – provided by the federal government implied a well-rounded and reliable source of data.
 Our data is sourced from the Federal Housing Financial Agency (FHFA). They introduce themselves as: 
