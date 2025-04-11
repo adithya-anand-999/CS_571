@@ -50,7 +50,7 @@ async function start() {
                                    .on("click", stateCard);
     
     // START: adding city points to map
-    
+
     svg.selectAll('.city')
         .data(city_data)
         .enter()
@@ -69,8 +69,8 @@ async function start() {
                 .html(`<strong>Metro:</strong> ${d.Metro_name}`);
         })
         // below does a hover for metro name
-        // .append("title")
-        // .text(d => d.Metro_name);
+        .append("title")
+        .text(d => d.Metro_name);
     
     d3.select("body").on("click", function(event) {
         const isCity = event.target.classList.contains("city");
