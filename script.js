@@ -13,6 +13,9 @@ let QUARTERLY_STATE_DATA = {};
 // Dictionary for converting state names
 const STATE_NAME_DICT = {"AL":"Alabama","AK":"Alaska","AZ":"Arizona","AR":"Arkansas","CA":"California","CO":"Colorado","CT":"Connecticut","DE":"Delaware","FL":"Florida","GA":"Georgia","HI":"Hawaii","ID":"Idaho","IL":"Illinois","IN":"Indiana","IA":"Iowa","KS":"Kansas","KY":"Kentucky","LA":"Louisiana","ME":"Maine","MD":"Maryland","MA":"Massachusetts","MI":"Michigan","MN":"Minnesota","MS":"Mississippi","MO":"Missouri","MT":"Montana","NE":"Nebraska","NV":"Nevada","NH":"New Hampshire","NJ":"New Jersey","NM":"New Mexico","NY":"New York","NC":"North Carolina","ND":"North Dakota","OH":"Ohio","OK":"Oklahoma","OR":"Oregon","PA":"Pennsylvania","RI":"Rhode Island","SC":"South Carolina","SD":"South Dakota","TN":"Tennessee","TX":"Texas","UT":"Utah","VT":"Vermont","VA":"Virginia","WA":"Washington","WV":"West Virginia","WI":"Wisconsin","WY":"Wyoming"};
 
+// global variable to load in unique cities
+let city_data = []
+
 // Initialize the website
 start();
 
@@ -45,7 +48,38 @@ async function start() {
                                    .attr("d", path)
                                    .attr("id", d => d.properties.name)
                                    .on("click", stateCard);
+    
+    // START: adding city points to map
 
+    svg.selectAll('.city')
+        .data(city_data)
+        .enter()
+        .append('circle')
+        .attr('class', 'city')
+        .attr("cx", d => projection([d.Cords[1], d.Cords[0]])[0]) // lon, lat
+        .attr("cy", d => projection([d.Cords[1], d.Cords[0]])[1])
+        .attr("r", 4)
+        .style("fill", "red")
+        // below brings up a card with the metro name
+        .on("click", (event, d) => {
+            const card = d3.select("#city-info-card");
+            card.style("display", "block")
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 20) + "px")
+                .html(`<strong>Metro:</strong> ${d.Metro_name}`);
+        })
+        // below does a hover for metro name
+        .append("title")
+        .text(d => d.Metro_name);
+    
+    d3.select("body").on("click", function(event) {
+        const isCity = event.target.classList.contains("city");
+        if (!isCity) {
+            d3.select("#city-info-card").style("display", "none");
+        }
+    });
+
+    //END
 }
 
 // Helper for loading in json and initializing our dictionaries
@@ -68,6 +102,21 @@ async function loadData() {
     await d3.json("./datasets/jsonFiles/annualStateData.json").then(data => populateDictionary(data, ANNUAL_STATE_DATA));
     await d3.json("./datasets/jsonFiles/quarterlyStateData.json").then(data => populateDictionary(data, QUARTERLY_STATE_DATA));
     // TODO: Add city data parsing here
+
+    //START: Parsing cities
+    metro_data_file_path = "/datasets/jsonFiles/metro_data.json"
+    await d3.json(metro_data_file_path).then(data => {
+        const seen = new Set()
+        city_data = data.filter(e => {
+            if(!seen.has(e.Metro_name)){
+                seen.add(e.Metro_name);
+                return true;
+            }
+            return false;
+        })
+    })
+    // console.log(city_data)
+    // END
 }
 
 
