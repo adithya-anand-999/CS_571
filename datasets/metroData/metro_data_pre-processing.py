@@ -1,8 +1,8 @@
 import pandas as pd
-from geopy.geocoders import Nominatim
+# from geopy.geocoders import Nominatim
 from datetime import datetime
 import googlemaps
-import time
+# import time
 
 API_KEY = "#################"
 
