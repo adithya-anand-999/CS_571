@@ -3,6 +3,9 @@
 ## Authors
 Adithya Anand, Blair Huang, Isabella Marino
 
+## Progress Book 
+https://docs.google.com/document/d/14G_KiDar4GGV3Y_F_achrRgLeVwDGobJ57sT6AxJOWk/edit?usp=sharing
+
 ## Instructions on how to start and find our code
 To start our code you navigate to the top directory of our GitHub repo to find the website.html file. Then you start website.html using live server. From here you can view the output of all the code we have worked on.  
 
