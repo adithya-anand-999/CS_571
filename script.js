@@ -48,9 +48,8 @@ async function loadData() {
     await d3.json("./datasets/jsonFiles/us-states.json").then(data => PATH_DATA = data);
     await d3.json("./datasets/jsonFiles/annualStateData.json").then(data => populateDictionary(data, ANNUAL_STATE_DATA));
     await d3.json("./datasets/jsonFiles/quarterlyStateData.json").then(data => populateDictionary(data, QUARTERLY_STATE_DATA));
-    // TODO: Add city data parsing here
 
-    //START: Parsing cities
+    //Parsing cities
     metro_data_file_path = "/datasets/jsonFiles/metro_data.json"
     await d3.json(metro_data_file_path).then(data => {
         const seen = new Set()
@@ -62,8 +61,6 @@ async function loadData() {
             return false;
         })
     })
-    // console.log(city_data)
-    // END
 }
 
 function generateMap(){
@@ -90,7 +87,7 @@ function generateMap(){
 
     const colorScale = d3.scaleLinear() //d3.select("#metric").node().value)
                       .domain([d3.min(yearStatePrice), d3.max(yearStatePrice)])
-                      .range(["#b7efc5", "#1a7431", "#10451d"]); 
+                      .range(["#d7e6f7", "#194475"]); 
 
 
     const wantedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])
@@ -103,12 +100,11 @@ function generateMap(){
                                 .attr("d", path)
                                 .style('fill', (d) => colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price']))
                                 .attr("id", d => d.properties.name)
-                                .on('mouseover', (event, _d) => d3.select(event.currentTarget).style("fill", "#68b0ab"))
+                                .on('mouseover', (event, _d) => d3.select(event.currentTarget).style("fill", "#ffd500"))
                                 .on("mouseout", (event, d) => d3.select(event.currentTarget).style("fill", colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price'])))
                                 .on("click", stateCard);
 
-    // START: adding city points to map
-
+    //adding city points to map
     svg.selectAll('.city')
         .data(city_data)
         .enter()
@@ -117,7 +113,7 @@ function generateMap(){
         .attr("cx", d => projection([d.Cords[1], d.Cords[0]])[0]) // lon, lat
         .attr("cy", d => projection([d.Cords[1], d.Cords[0]])[1])
         .attr("r", 4)
-        .style("fill", "red")
+        .style("fill", "#ff6700")
         // below brings up a card with the metro name
         .on("click", (event, d) => {
             const card = d3.select("#city-info-card");
@@ -136,7 +132,6 @@ function generateMap(){
             d3.select("#city-info-card").style("display", "none");
         }
     });
-    //END
 }
 
 // PLACEHOLDER: Currently helps show functionality of code
