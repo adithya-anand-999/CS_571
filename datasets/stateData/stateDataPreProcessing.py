@@ -69,6 +69,7 @@ cleaned_price_df = cleaned_price_df.rename(columns = {'Year-Quarter':'Year', 'Me
 
 ''' GROUP THE DATAFRAMES '''
 grouped_df = pd.merge(cleaned_state_df, cleaned_price_df, on = ['State', 'Year'], how = 'outer')
+grouped_df = grouped_df[grouped_df['State']!='US'] # removed rows with US for coloring purposes
 print(grouped_df)
 
 
