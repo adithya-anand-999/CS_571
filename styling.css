@@ -10,7 +10,9 @@ path {
     fill: none;
 }
 
-/* Effect upon hovering a state (TEMP SETTINGS)*/
-.state:hover {
-    fill:rgb(158, 208, 239)
+body{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    justify-self: center;
 }
