@@ -50,7 +50,7 @@ async function loadData() {
     await d3.json("./datasets/jsonFiles/quarterlyStateData.json").then(data => populateDictionary(data, QUARTERLY_STATE_DATA));
 
     //Parsing cities
-    metro_data_file_path = "/datasets/jsonFiles/metro_data.json"
+    metro_data_file_path = "./datasets/jsonFiles/metro_data.json"
     await d3.json(metro_data_file_path).then(data => {
         const seen = new Set()
         city_data = data.filter(e => {
