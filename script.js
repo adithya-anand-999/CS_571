@@ -82,15 +82,14 @@ function generateMap(){
     let path = d3.geoPath()
               .projection(projection);
 
-    const yearStatePrice = Object.values(ANNUAL_STATE_DATA).map((stateData) => stateData[0]['Average Price'])
+    const wantedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])
+
+    const yearStatePrice = Object.values(ANNUAL_STATE_DATA).map((stateData) => stateData[wantedYear]['Average Price'])
     console.log(yearStatePrice)
 
     const colorScale = d3.scaleLinear() //d3.select("#metric").node().value)
                       .domain([d3.min(yearStatePrice), d3.max(yearStatePrice)])
                       .range(["#d7e6f7", "#194475"]); 
-
-
-    const wantedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])
 
     // Create states
     let states = svg.selectAll(".state")
