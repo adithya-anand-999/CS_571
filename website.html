@@ -9,12 +9,15 @@
 
     <body>
         <div class = "map-div"></div>
-        <div class = "input-div" id = "input">
-            <label for="yearBox">Year:</label>
-            <input type="number" id="yearBox" class="year-input" min="2000" max="2010" value="2000" readonly>
-            <input id = "year" type="range" min="2000" max="2010" value="2000">
+        <div class = "nav"> 
+            <div class = "input-div" id = "input">
+                <label for="yearBox">Year:</label>
+                <input type="number" id="yearBox" class="year-input" min="2000" max="2010" value="2000" readonly>
+                <input id = "year" type="range" min="2000" max="2010" value="2000">
+            </div>
+            <div class = "legend" id = "legend"><b>Legend</b></div>
+            <div id="city-info-card" class="info-card" style="display: none;"></div>
         </div>
-        <div id="city-info-card" class="info-card" style="display: none;"></div>
     </body>
 
     <script src="script.js"></script>

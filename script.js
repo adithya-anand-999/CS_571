@@ -1,6 +1,6 @@
 // Constants for the charts
 const MAP_HEIGHT = 700;
-const MAP_WIDTH = 1400;
+const MAP_WIDTH = 1100;
 
 // Global for path data
 let PATH_DATA;
@@ -65,18 +65,18 @@ async function loadData() {
 
 function generateMap(){
     // remove previous on each refresh
-    d3.select('svg').remove();
+    d3.selectAll('svg').remove();
 
     // Create an svg to hold the map
-        let svg = d3.select(".map-div").append("svg")  
-                                       .attr("id", "map-svg")
-                                       .attr("height", MAP_HEIGHT)
-                                       .attr("width", MAP_WIDTH);
+    let svg = d3.select(".map-div").append("svg")  
+                                   .attr("id", "map-svg")
+                                   .attr("height", MAP_HEIGHT)
+                                   .attr("width", MAP_WIDTH);
 
-     // Convert spherical coordinates to 2D cooordinates 
-     let projection = d3.geoAlbersUsa()
-     .translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]) // this centers the map in our SVG element
-     .scale([1300]); // this specifies how much to zoom
+    // Convert spherical coordinates to 2D cooordinates 
+    let projection = d3.geoAlbersUsa()
+    .translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]) // this centers the map in our SVG element
+    .scale([1300]); // this specifies how much to zoom
 
     // Convert the projected lat/lon coordinates into an SVG path string
     let path = d3.geoPath()
@@ -131,6 +131,72 @@ function generateMap(){
             d3.select("#city-info-card").style("display", "none");
         }
     });
+
+    // creates the legend
+    const legend = d3.select('#legend')
+                     .append('svg')
+    
+    // dot
+    const dotGroup = legend.append('g')
+    
+    dotGroup.attr('transform', `translate(0, 20)`)
+    
+    dotGroup.append("circle")
+          .attr("cx", 5)
+          .attr("cy", 5)
+          .attr("r", 5)
+          .attr("fill", "#ff6700")
+
+    dotGroup.append('text')
+          .attr("x", 20)     
+          .attr("y", 5)    
+          .text("Metropolitan Area")
+          .style("font-size", "16px")
+          .attr("alignment-baseline", "middle");
+
+    // Color Scale
+    const color = legend.append('g')
+                        .attr('x', 0)
+                        .attr('y', 0)
+
+    // min and max for gradient, can implement logic to choose which one
+    const min = d3.min(yearStatePrice);
+    const max = d3.max(yearStatePrice);
+
+    // create gradient
+    const defs = legend.append("defs"); 
+    const linearGradient = defs.append("linearGradient")
+                               .attr("id", "color-gradient")
+                               .attr("x1", "0%")    //gradient start
+                               .attr("y1", "0%")
+                               .attr("x2", "100%")  // gradient end
+                               .attr("y2", "0%");
+    
+    const stops = d3.range(0, 1.01, 0.1);  // from 0 to 1 in steps of 0.1
+
+    linearGradient.selectAll("stop")
+                  .data(stops)
+                  .enter()
+                  .append("stop")
+                  .attr("offset", d => `${d * 100}%`) 
+                  .attr("stop-color", d => colorScale(min + d * (max - min)));
+
+    color.append('text')
+         .attr('x', 0)
+         .attr('y', 68)
+         .text(min)
+
+    color.append('rect')
+         .attr('x', 70)
+         .attr('y', 54)
+         .attr('width', 150)
+         .attr('height', 20)
+         .attr('fill',  "url(#color-gradient)")
+
+    color.append('text')
+         .attr('x', 230)
+         .attr('y', 68)
+         .text(max)
 }
 
 // PLACEHOLDER: Currently helps show functionality of code
