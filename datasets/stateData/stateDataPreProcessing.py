@@ -22,7 +22,8 @@ cleaned_state_df = cleaned_state_df.drop('Warning', axis=1)
 cleaned_state_df = cleaned_state_df.reset_index(drop = True)
 #cleaned_state_df['Year'] = cleaned_state_df['Year'].str.strip()
 cleaned_state_df['State'] = cleaned_state_df['State'].str.strip()
-cleaned_state_df['Quarter'] = cleaned_state_df['Quarter'].astype(float)
+cleaned_state_df['Quarter'] = cleaned_state_df['Quarter'].astype(int)
+cleaned_state_df['Year'] = cleaned_state_df['Year'].astype(int)
 cleaned_state_df['NSA Index'] = cleaned_state_df['NSA Index'].astype(float)
 cleaned_state_df['SA Index'] = cleaned_state_df['SA Index'].astype(float)
 
@@ -49,6 +50,16 @@ cleaned_price_df = cleaned_price_df.dropna(axis = 0, how = 'all')
 # Get the average 
 print(cleaned_price_df.info())
 
+# Make quarterly data branch
+quarterly_price_df = cleaned_price_df.copy()
+quarterly_price_df['Year'] = quarterly_price_df['Year-Quarter'].str.slice(0, 4).astype(int)
+quarterly_price_df['Quarter'] = quarterly_price_df['Year-Quarter'].str.slice(5).astype(int)
+quarterly_price_df = quarterly_price_df.drop('Year-Quarter', axis=1)
+quarterly_price_df = quarterly_price_df.drop('Median Price', axis=1)
+quarterly_price_df['Average Price'] = quarterly_price_df['Average Price'].replace({'\$': '', ',': '', ' ':''}, regex=True)
+quarterly_price_df['Average Price'] = quarterly_price_df['Average Price'].astype(float)
+print(quarterly_price_df)
+
 # Take out quarter numbers
 cleaned_price_df['Year-Quarter'] = cleaned_price_df['Year-Quarter'].apply(lambda x: x[0:4])
 print(cleaned_price_df)
@@ -70,9 +81,12 @@ cleaned_price_df = cleaned_price_df.rename(columns = {'Year-Quarter':'Year', 'Me
 ''' GROUP THE DATAFRAMES '''
 grouped_df = pd.merge(cleaned_state_df, cleaned_price_df, on = ['State', 'Year'], how = 'outer')
 grouped_df = grouped_df[grouped_df['State']!='US'] # removed rows with US for coloring purposes
+final_quarterly_df = pd.merge(quarterly_df, quarterly_price_df, on=['State', 'Year', 'Quarter'], how = 'outer')
+final_quarterly_df = final_quarterly_df[final_quarterly_df['State']!='US'] # removed rows with US for coloring purposes
 print(grouped_df)
 
 
 ''' EXPORT AS JSON '''
 grouped_df.to_json('./datasets/jsonFiles/annualStateData.json', orient='records', lines=False)
-quarterly_df.to_json('./datasets/jsonFiles/quarterlyStateData.json', orient='records', lines=False)
+#quarterly_df.to_json('./datasets/jsonFiles/quarterlyStateData.json', orient='records', lines=False)
+final_quarterly_df.to_json('./datasets/jsonFiles/quarterlyStateData.json', orient='records', lines=False)

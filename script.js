@@ -12,6 +12,7 @@ let city_data = [];
 
 // Global for list of selected states
 let selected = {metros: [], states: []};
+let years_list = [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010];
 
 // Global to show if scale is HPI or Avg Price
 let use_HPI = false;
@@ -27,7 +28,8 @@ async function start() {
     // Load in our json data
     await loadData();
     generateMap();
-    generateQuarterlyGraph();   
+    generateQuarterlyGraph(); 
+    
 }   
 
 // Helper for loading in json and initializing our dictionaries
@@ -139,8 +141,12 @@ function generateQuarterlyGraph(){
     // Define svg dimensions
     let HEIGHT = 350;
     let WIDTH = 500;
-    let MARGINS = {left: 50, right: 10, top: 70, bottom: 60}
-    let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])
+    let MARGINS = {left: 50, right: 10, top: 75, bottom: 60};
+    let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
+    let selectedMetros = selected.metros;
+    let selectedStates = selected.states;
+    let filteredSelectedData = [];
+    let yAxisValues = [];
 
     // Select the right svg and remove previous data
     let svg = d3.select("#quarterly-graph");
@@ -162,8 +168,14 @@ function generateQuarterlyGraph(){
     .attr("y", HEIGHT - 30)
     .text("Quarter");
 
+    svg.append("text")
+    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) - MARGINS.right - MARGINS.left)
+    .attr("y", 65)
+    .text(use_HPI ? "Quarterly State HPI Index in " + years_list[selectedYear] : "Quarterly State Average Price in " + years_list[selectedYear]);
+
     // Check if anything nothing is selected
     if ((selected.metros.length === 0) && (selected.states.length === 0)){
+
         // Generate a blank y-axis
         let yScale = d3.scaleLinear().domain([0, 0]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
         let yAxis = d3.axisLeft().scale(yScale).ticks(0);
@@ -182,6 +194,27 @@ function generateQuarterlyGraph(){
         return;
     }
 
+    console.log(QUARTERLY_STATE_DATA);
+    // Iterate through the selected states
+    selectedStates.forEach(stateName => {
+        let quarters = [1,2,3,4]
+        let curState = QUARTERLY_STATE_DATA[stateName];
+        let yValues = []
+
+        // Find the HPI index for each quarter of the current state
+        quarters.forEach(q => {
+            curIndex = (curState.find(instance => instance["Year"] === selectedYear && instance["Quarter"] === q))["SA_Index"];
+            // Add the value to the array of all values as well as the state specific array
+            yAxisValues.push(curIndex);
+            yValues.push(curIndex);
+        });
+
+        // Push the final filtered state data to an array that will be used to create the lines
+        filteredSelectedData.push({name: stateName, indexes: yValues});
+    });
+    
+
+    console.log(QUARTERLY_STATE_DATA);
     // Check if using HPI values
     if (use_HPI) {
         // If so, filter data using hpi index
@@ -254,4 +287,5 @@ const yearBox = d3.select('#yearBox');
 slider.on('input', function(){
     yearBox.property('value', this.value);
     generateMap();
+    generateQuarterlyGraph();
 });
