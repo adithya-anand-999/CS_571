@@ -15,7 +15,7 @@ let selected = {metros: [], states: []};
 let years_list = [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010];
 
 // Global to show if scale is HPI or Avg Price
-let scaleHPI = true;
+let scaleHPI = false;
 
 // Dictionary for converting state names
 const STATE_NAME_DICT = {"DC":"District of Columbia", "AL":"Alabama","AK":"Alaska","AZ":"Arizona","AR":"Arkansas","CA":"California","CO":"Colorado","CT":"Connecticut","DE":"Delaware","FL":"Florida","GA":"Georgia","HI":"Hawaii","ID":"Idaho","IL":"Illinois","IN":"Indiana","IA":"Iowa","KS":"Kansas","KY":"Kentucky","LA":"Louisiana","ME":"Maine","MD":"Maryland","MA":"Massachusetts","MI":"Michigan","MN":"Minnesota","MS":"Mississippi","MO":"Missouri","MT":"Montana","NE":"Nebraska","NV":"Nevada","NH":"New Hampshire","NJ":"New Jersey","NM":"New Mexico","NY":"New York","NC":"North Carolina","ND":"North Dakota","OH":"Ohio","OK":"Oklahoma","OR":"Oregon","PA":"Pennsylvania","RI":"Rhode Island","SC":"South Carolina","SD":"South Dakota","TN":"Tennessee","TX":"Texas","UT":"Utah","VT":"Vermont","VA":"Virginia","WA":"Washington","WV":"West Virginia","WI":"Wisconsin","WY":"Wyoming"};
@@ -206,13 +206,11 @@ function generateQuarterlyGraph(){
     .attr("y", 65)
     .text(scaleHPI ? "Quarterly State HPI Index in " + years_list[selectedYear] : "Quarterly State Average Price in " + years_list[selectedYear]);
 
-    // Check if anything nothing is selected
+    // Check if nothing is selected
     if ((selected.metros.length === 0) && (selected.states.length === 0)){
-
         // Generate a blank y-axis
         let yScale = d3.scaleLinear().domain([0, 0]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
         let yAxis = d3.axisLeft().scale(yScale).ticks(0);
-
         // Add the y-axis to the svg
         svg.append("g")
            .attr("id", "y-axis")
@@ -222,8 +220,7 @@ function generateQuarterlyGraph(){
            .attr("x", (0 -(HEIGHT - (MARGINS.top + MARGINS.bottom))/2) - (MARGINS.top + MARGINS.bottom) + 20)
            .attr("y", 15)
            .attr("transform", "rotate(-90)")
-           .text(scaleHPI ? "HPI Index" : "Average Price");
-        
+           .text(scaleHPI ? "HPI Index" : "Average Price");    
         return;
     }
     
@@ -234,7 +231,6 @@ function generateQuarterlyGraph(){
             let quarters = [1,2,3,4]
             let curState = QUARTERLY_STATE_DATA[stateName];
             let instances = []
-
             // Find the HPI index for each quarter of the current state
             quarters.forEach(q => {
                 found = (curState.find(instance => instance["Year"] === years_list[selectedYear] && instance["Quarter"] === q));
@@ -243,10 +239,10 @@ function generateQuarterlyGraph(){
                 yAxisValues.push(curIndexVal);
                 instances.push(found);
             });
-
             // Push the final filtered state data to an array that will be used to create the lines
             filteredSelectedData.push(instances);
         });
+
     }
     // Otherwise, filter the data using avg price
     else {
@@ -254,7 +250,6 @@ function generateQuarterlyGraph(){
             let quarters = [1,2,3,4]
             let curState = QUARTERLY_STATE_DATA[stateName];
             let instances = []
-
             // Find the HPI index for each quarter of the current state
             quarters.forEach(q => {
                 let found = (curState.find(instance => instance["Year"] === years_list[selectedYear] && instance["Quarter"] === q));
@@ -263,55 +258,72 @@ function generateQuarterlyGraph(){
                 yAxisValues.push(curIndexVal);
                 instances.push(found);
             });
-
             // Push the final filtered state data to an array that will be used to create the lines
             filteredSelectedData.push(instances);     
         });
+                        
+    }
 
-        let yScale = d3.scaleLinear().domain([d3.min(yAxisValues), d3.max(yAxisValues)]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
-        let yAxis = d3.axisLeft().scale(yScale);
+    // Declare y axis
+    let yScale = d3.scaleLinear().domain([d3.min(yAxisValues), d3.max(yAxisValues)]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
+    let yAxis = d3.axisLeft().scale(yScale);
 
-        // Add the y-axis to the svg
-        svg.append("g")
-           .attr("id", "y-axis")
-           .attr("transform", "translate(" + MARGINS.left + "," + MARGINS.top + ")")
-           .call(yAxis);
-        svg.append("text")
-           .attr("x", (0 -(HEIGHT - (MARGINS.top + MARGINS.bottom))/2) - (MARGINS.top + MARGINS.bottom) + 20)
-           .attr("y", 15)
-           .attr("transform", "rotate(-90)")
-           .text(scaleHPI ? "HPI Index" : "Average Price");
+    // Create the line generator function
+    let priceLineGenerator = d3.line()
+                       .x(d => xScale(String(d["Quarter"])))
+                       .y(d => yScale(d["Average Price"]));
+    let indexLineGenerator = d3.line()
+                       .x(d => xScale(String(d["Quarter"])))
+                       .y(d => yScale(d["SA Index"])); 
 
-        // Create the line generator function
-        let lineGenerator = d3.line()
-                              .x(d => xScale(String(d["Quarter"])))
-                              .y(d => yScale(d["Average Price"]));
-        
-        // Create color scale
-        let colorScale = d3.scaleOrdinal()
-                           .domain(selectedStates)
-                           .range(d3.schemeCategory10);
+    let colorScale = d3.scaleOrdinal()
+                       .domain(selectedStates)
+                       .range(d3.schemeCategory10);
+                       
+    // Create the map visualization using the path and data
+    let lines = svg.append("g")
+    .attr("id", "lines")
+    .attr("transform", "translate(" + (MARGINS.left) + "," + MARGINS.top + ")");
 
-        // Create the map visualization using the path and data
-        let lines = svg.append("g")
-                       .attr("id", "lines")
-                       .attr("transform", "translate(" + (MARGINS.left) + "," + MARGINS.top + ")");
+    // Create lines for each group
+    lines.selectAll(".line")
+        .data(filteredSelectedData)
+        .enter()
+        .append("path")
+        .attr("class", "line")
+        .style("stroke", (instances) => colorScale(STATE_NAME_DICT[(instances[0])["State"]]))
+        .style("stroke-width", 2)
+        .attr("fill", "none")
+        .attr("d", (instances) => scaleHPI ? indexLineGenerator(instances) : priceLineGenerator(instances));
+    
+    let points = svg.append("g")
+                    .attr("id", "points")
+                    .attr("transform", "translate(" + (MARGINS.left) + "," + MARGINS.top + ")");
 
-        // Create lines for each group
-        lines.selectAll(".line")
-             .data(filteredSelectedData)
-             .enter()
-             .append("path")
-             .attr("class", "line")
-             .attr("stroke", (instances) => {
-                return colorScale(STATE_NAME_DICT[(instances[0])["State"]]);
-
-             })
-             .attr("stroke-width", 2)
-             .attr("fill", "none")
-             .attr("d", (instances) => lineGenerator(instances));
-                      
-    }   
+    filteredSelectedData.forEach(selectedS => {
+        points.append("g")
+          .selectAll(".point")
+          .data(selectedS)
+          .enter()
+          .append("circle")
+          .attr("class", "point")
+          .attr("cx", d=> xScale(String(d["Quarter"])))
+          .attr("cy", d=> scaleHPI ? yScale(d["SA Index"]) : yScale(d["Average Price"]))
+          .attr("r", 3)
+          .style("fill", d=> (colorScale(STATE_NAME_DICT[d["State"]])));
+    });
+    
+    
+    // Add the y-axis to the svg
+    svg.append("g")
+        .attr("id", "y-axis")
+        .attr("transform", "translate(" + MARGINS.left + "," + MARGINS.top + ")")
+        .call(yAxis);
+    svg.append("text")
+        .attr("x", (0 -(HEIGHT - (MARGINS.top + MARGINS.bottom))/2) - (MARGINS.top + MARGINS.bottom) + 20)
+        .attr("y", 15)
+        .attr("transform", "rotate(-90)")
+        .text(scaleHPI ? "HPI Index" : "Average Price");
 }
 
 function selectMetro(event, d) {
