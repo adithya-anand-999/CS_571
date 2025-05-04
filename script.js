@@ -15,7 +15,7 @@ let selected = {metros: [], states: []};
 let years_list = [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010];
 
 // Global to show if scale is HPI or Avg Price
-let scaleHPI = false;
+let scaleHPI = true;
 
 // Dictionary for converting state names
 const STATE_NAME_DICT = {"DC":"District of Columbia", "AL":"Alabama","AK":"Alaska","AZ":"Arizona","AR":"Arkansas","CA":"California","CO":"Colorado","CT":"Connecticut","DE":"Delaware","FL":"Florida","GA":"Georgia","HI":"Hawaii","ID":"Idaho","IL":"Illinois","IN":"Indiana","IA":"Iowa","KS":"Kansas","KY":"Kentucky","LA":"Louisiana","ME":"Maine","MD":"Maryland","MA":"Massachusetts","MI":"Michigan","MN":"Minnesota","MS":"Mississippi","MO":"Missouri","MT":"Montana","NE":"Nebraska","NV":"Nevada","NH":"New Hampshire","NJ":"New Jersey","NM":"New Mexico","NY":"New York","NC":"North Carolina","ND":"North Dakota","OH":"Ohio","OK":"Oklahoma","OR":"Oregon","PA":"Pennsylvania","RI":"Rhode Island","SC":"South Carolina","SD":"South Dakota","TN":"Tennessee","TX":"Texas","UT":"Utah","VT":"Vermont","VA":"Virginia","WA":"Washington","WV":"West Virginia","WI":"Wisconsin","WY":"Wyoming"};
@@ -47,8 +47,8 @@ async function start() {
                                     .domain([d3.min(globalPrices), (d3.max(globalPrices)-d3.min(globalPrices))/2, d3.max(globalPrices)])
                                     .range(["#d7e6f7", "#194475", "#0c1263"]);
     globalIndexColorScale = d3.scaleLinear()
-                                    .domain([d3.min(globalIndexes), (d3.max(globalIndexes)-d3.min(globalIndexes))/2, d3.max(globalIndexes)])
-                                    .range(["#d7e6f7", "#194475", "#0c1263"]);
+                                    .domain([d3.min(globalIndexes), d3.max(globalIndexes)])
+                                    .range(["#d7e6f7", "#194475"]);
     generateMap();
     generateQuarterlyGraph(); 
     
@@ -287,8 +287,6 @@ function generateQuarterlyGraph(){
                               .x(d => xScale(String(d["Quarter"])))
                               .y(d => yScale(d["Average Price"]));
         
-        
-        console.log(selectedStates)
         // Create color scale
         let colorScale = d3.scaleOrdinal()
                            .domain(selectedStates)
@@ -298,7 +296,6 @@ function generateQuarterlyGraph(){
         let lines = svg.append("g")
                        .attr("id", "lines")
                        .attr("transform", "translate(" + (MARGINS.left) + "," + MARGINS.top + ")");
-
 
         // Create lines for each group
         lines.selectAll(".line")
@@ -314,14 +311,7 @@ function generateQuarterlyGraph(){
              .attr("fill", "none")
              .attr("d", (instances) => lineGenerator(instances));
                       
-    }
-
-    // Create scales
-    // Create the y axis
-    // Append the y axis
-
-    // Create the lines
-    
+    }   
 }
 
 function selectMetro(event, d) {
