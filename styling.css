@@ -6,8 +6,10 @@ path {
 }
 
 /* Styling for each state */
-.state {
-    fill: none;
+
+
+.state.selected {
+    fill: #FAC898;
 }
 
 body{
@@ -42,3 +44,30 @@ body{
     margin: 20px 0;
     font-size: 2rem;
   }
+
+#vis-container {
+    width: 1400px;
+    height: 700px;
+    display:flex;
+}
+
+#map-svg {
+    width: 900px;
+    height: 700px;
+}
+
+#graphs-container {
+    width: 500px;
+    height: 700px;
+}
+
+#quarterly-graph {
+    width: 500px;
+    height: 350px;
+}
+
+#static-graph {
+    width: 500px;
+    height: 350px;
+}
+

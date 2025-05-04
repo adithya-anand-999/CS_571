@@ -1,32 +1,30 @@
 // Constants for the charts
 const MAP_HEIGHT = 700;
-const MAP_WIDTH = 1400;
+const MAP_WIDTH = 900;
 
 // Global for path data
 let PATH_DATA;
 
 // Global dictionaries for our data
-// TODO: Add dictionaries for the other data
 let ANNUAL_STATE_DATA = {};
 let QUARTERLY_STATE_DATA = {};
+let city_data = [];
+
+// Global for list of selected states
+let selected = {metros: [], states: []};
 
 // Dictionary for converting state names
-// Added DC since it wasn't previously added
 const STATE_NAME_DICT = {"DC":"District of Columbia", "AL":"Alabama","AK":"Alaska","AZ":"Arizona","AR":"Arkansas","CA":"California","CO":"Colorado","CT":"Connecticut","DE":"Delaware","FL":"Florida","GA":"Georgia","HI":"Hawaii","ID":"Idaho","IL":"Illinois","IN":"Indiana","IA":"Iowa","KS":"Kansas","KY":"Kentucky","LA":"Louisiana","ME":"Maine","MD":"Maryland","MA":"Massachusetts","MI":"Michigan","MN":"Minnesota","MS":"Mississippi","MO":"Missouri","MT":"Montana","NE":"Nebraska","NV":"Nevada","NH":"New Hampshire","NJ":"New Jersey","NM":"New Mexico","NY":"New York","NC":"North Carolina","ND":"North Dakota","OH":"Ohio","OK":"Oklahoma","OR":"Oregon","PA":"Pennsylvania","RI":"Rhode Island","SC":"South Carolina","SD":"South Dakota","TN":"Tennessee","TX":"Texas","UT":"Utah","VT":"Vermont","VA":"Virginia","WA":"Washington","WV":"West Virginia","WI":"Wisconsin","WY":"Wyoming"};
-
-// global variable to load in unique cities
-let city_data = []
 
 // Initialize the website
 start();
 
 // Setup the website & draw the map
 async function start() {
-
     // Load in our json data
     await loadData();
-    generateMap()
-       
+    generateMap();
+    generateQuarterlyGraph();   
 }   
 
 // Helper for loading in json and initializing our dictionaries
@@ -76,7 +74,7 @@ function generateMap(){
      // Convert spherical coordinates to 2D cooordinates 
      let projection = d3.geoAlbersUsa()
      .translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]) // this centers the map in our SVG element
-     .scale([1300]); // this specifies how much to zoom
+     .scale([1250]); // this specifies how much to zoom
 
     // Convert the projected lat/lon coordinates into an SVG path string
     let path = d3.geoPath()
@@ -100,8 +98,8 @@ function generateMap(){
                                 .style('fill', (d) => colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price']))
                                 .attr("id", d => d.properties.name)
                                 .on('mouseover', (event, _d) => d3.select(event.currentTarget).style("fill", "#FAC898"))
-                                .on("mouseout", (event, d) => d3.select(event.currentTarget).style("fill", colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price'])))
-                                .on("click", stateCard);
+                                .on("mouseout", (event, d) => !((event.currentTarget.classList).contains("selected")) ? d3.select(event.currentTarget).style("fill", colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price'])) : d3.select(event.currentTarget).style("fill", "#FAC898"))
+                                .on("click", selectState);
 
     //adding city points to map
     svg.selectAll('.city')
@@ -120,6 +118,7 @@ function generateMap(){
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY - 20) + "px")
                 .html(`<strong>Metro:</strong> ${d.Metro_name}`);
+            selectMetro(event,d);
         })
         // below does a hover for metro name
         .append("title")
@@ -133,10 +132,61 @@ function generateMap(){
     });
 }
 
+function generateQuarterlyGraph(){
+    // Define svg dimensions
+    let HEIGHT = 350;
+    let WIDTH = 500;
+    let MARGINS = {left: 40, right: 10, top: 5, bottom: 15}
+    let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])
+   
+    let svg = d3.select("#quarterly-graph");
+    svg.selectAll("*").remove();
+
+
+    // Check if anything if selected
+    if (selected.length === 0){
+        // If not, only generate axis's
+        // Then return
+        return;
+    }
+    
+}
+
+function selectMetro(event, d) {
+    // If the metro was already selected, remove it
+    if ((selected.metros).includes(d.properties.name)) {
+        let index = (selected.metros).indexOf(d.properties.name);
+        (selected.metros).splice(index, 1);
+    }
+
+    // Otherwise, add it
+    else { (selected.metros).push(d.properties.name); }
+
+    // Regenerate the quarterly graph
+    generateQuarterlyGraph();
+}
+
 // PLACEHOLDER: Currently helps show functionality of code
-function stateCard(event, d) { 
+function selectState(event, d) { 
+    console.log(event)
+    // If the metro was already selected, remove it
+    if ((selected.states).includes(d.properties.name)) {
+        let index = (selected.states).indexOf(d.properties.name);
+        (selected.states).splice(index, 1);
+        event.currentTarget.classList.remove("selected");
+    }
+    // Otherwise, add it
+    else {
+        (selected.states).push(d.properties.name);
+        event.currentTarget.classList.add("selected");
+    }
+    console.log(selected.states);
+    // Regenerate the quarterly graph
+    generateQuarterlyGraph();
+
+    /*
+    alert("clicked");
     curState = d.properties.name;
-    alert(curState); 
 
     // Open console to see structure of dictionaries
     console.log('Annual State Data:\n');
@@ -148,6 +198,7 @@ function stateCard(event, d) {
     // Example usage of a dictionary given a clicked state
     console.log(curState + "'s avg house price over the years:");
     ANNUAL_STATE_DATA[curState].forEach(instance => console.log(instance['Year'] + ': ' + instance['Average Price']));
+    */
 }
 
 // slider

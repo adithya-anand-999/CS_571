@@ -11,7 +11,13 @@
         <h1 class="header-title">
             Analysis of United States Housing Market from 2000–2010
         </h1>
-        <div class = "map-div"></div>
+        <div id="vis-container">
+            <div class = "map-div"></div>
+            <div id = "graphs-container">
+                <svg id = "quarterly-graph"></svg>
+                <svg id = "static-graph"></svg>
+            </div>
+        </div>
         <div class = "input-div" id = "input">
             <label for="yearBox">Year:</label>
             <input type="number" id="yearBox" class="year-input" min="2000" max="2010" value="2000" readonly>
