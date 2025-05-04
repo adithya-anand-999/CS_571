@@ -20,23 +20,9 @@ let scaleHPI = false;
 // Dictionary for converting state names
 const STATE_NAME_DICT = {"DC":"District of Columbia", "AL":"Alabama","AK":"Alaska","AZ":"Arizona","AR":"Arkansas","CA":"California","CO":"Colorado","CT":"Connecticut","DE":"Delaware","FL":"Florida","GA":"Georgia","HI":"Hawaii","ID":"Idaho","IL":"Illinois","IN":"Indiana","IA":"Iowa","KS":"Kansas","KY":"Kentucky","LA":"Louisiana","ME":"Maine","MD":"Maryland","MA":"Massachusetts","MI":"Michigan","MN":"Minnesota","MS":"Mississippi","MO":"Missouri","MT":"Montana","NE":"Nebraska","NV":"Nevada","NH":"New Hampshire","NJ":"New Jersey","NM":"New Mexico","NY":"New York","NC":"North Carolina","ND":"North Dakota","OH":"Ohio","OK":"Oklahoma","OR":"Oregon","PA":"Pennsylvania","RI":"Rhode Island","SC":"South Carolina","SD":"South Dakota","TN":"Tennessee","TX":"Texas","UT":"Utah","VT":"Vermont","VA":"Virginia","WA":"Washington","WV":"West Virginia","WI":"Wisconsin","WY":"Wyoming"};
 
-// Setup global colorscales
-let globalPrices = []
-let globalIndexes = []
-    
-Object.values(ANNUAL_STATE_DATA).forEach(state => {
-    state.forEach(instance => {
-        globalPrices.push(instance["Average Price"]);
-        globalIndexes.push(instance["SA Index Average"]);
-    });
-});
-    
-const globalPriceColorScale = d3.scaleLinear()
-                                .domain([d3.min(globalPrices), (d3.max(globalPrices)-d3.min(globalPrices))/2, d3.max(globalPrices)])
-                                .range(["#d7e6f7", "#194475", "#0c1263"]);
-const globalIndexColorScale = d3.scaleLinear()
-                                .domain([d3.min(globalIndexes), (d3.max(globalIndexes)-d3.min(globalIndexes))/2, d3.max(globalIndexes)])
-                                .range(["#d7e6f7", "#194475", "#0c1263"]);
+// Initialize global color scales
+let globalPriceColorScale = null;
+let globalIndexColorScale = null;
 
 // Initialize the website
 start();
@@ -45,6 +31,24 @@ start();
 async function start() {
     // Load in our json data
     await loadData();
+
+    // Set up global scales with loaded data
+    let globalPrices = []
+    let globalIndexes = []
+        
+    Object.values(ANNUAL_STATE_DATA).forEach(state => {
+        state.forEach(instance => {
+            globalPrices.push(instance["Average Price"]);
+            globalIndexes.push(instance["SA Index Average"]);
+        });
+    });
+        
+    globalPriceColorScale = d3.scaleLinear()
+                                    .domain([d3.min(globalPrices), (d3.max(globalPrices)-d3.min(globalPrices))/2, d3.max(globalPrices)])
+                                    .range(["#d7e6f7", "#194475", "#0c1263"]);
+    globalIndexColorScale = d3.scaleLinear()
+                                    .domain([d3.min(globalIndexes), (d3.max(globalIndexes)-d3.min(globalIndexes))/2, d3.max(globalIndexes)])
+                                    .range(["#d7e6f7", "#194475", "#0c1263"]);
     generateMap();
     generateQuarterlyGraph(); 
     
@@ -107,12 +111,14 @@ function generateMap(){
 
     const wantedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])
 
+    /*
     const yearStatePrice = Object.values(ANNUAL_STATE_DATA).map((stateData) => stateData[wantedYear]['Average Price'])
     console.log(yearStatePrice)
 
     const colorScale = d3.scaleLinear() //d3.select("#metric").node().value)
                       .domain([d3.min(yearStatePrice), d3.max(yearStatePrice)])
                       .range(["#d7e6f7", "#194475"]); 
+    */
 
     // Create states
     let states = svg.selectAll(".state")
@@ -120,10 +126,17 @@ function generateMap(){
                                 .append("path")
                                 .attr("class", "state")
                                 .attr("d", path)
-                                .style('fill', (d) => colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price']))
+                                .style('fill', (d) => globalPriceColorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price']))
                                 .attr("id", d => d.properties.name)
                                 .on('mouseover', (event, _d) => d3.select(event.currentTarget).style("fill", "#FAC898"))
-                                .on("mouseout", (event, d) => !((event.currentTarget.classList).contains("selected")) ? d3.select(event.currentTarget).style("fill", colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price'])) : d3.select(event.currentTarget).style("fill", "#FAC898"))
+                                .on("mouseout", (event, d) => {
+                                    curState = d3.select(event.currentTarget);
+                                    if (!((event.currentTarget.classList).contains("selected"))) {
+                                        if (scaleHPI) { curState.style("fill", globalIndexColorScale(((ANNUAL_STATE_DATA[d.properties.name])[d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])])['SA Index Average'])); }
+                                        else { curState.style("fill", globalPriceColorScale(((ANNUAL_STATE_DATA[d.properties.name])[d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])])['Average Price'])); }
+                                    }
+                                    else { d3.select(event.currentTarget).style("fill", "#FAC898"); }
+                                })
                                 .on("click", selectState);
 
     //adding city points to map
@@ -338,41 +351,28 @@ function selectState(event, d) {
         event.currentTarget.classList.add("selected");
     }
 
-    // Regenerate the quarterly graph
+    // Regenerate the quarterly graph nad update the colorscale
     generateQuarterlyGraph();
+    updateStateColorScale();
 }
 
 function updateStateColorScale() {
     const wantedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
 
-    /*
-    //const yearStatePrice = Object.values(ANNUAL_STATE_DATA).map((stateData) => stateData[wantedYear]['Average Price']);
-    //const yearIndexHPI = Object.values(ANNUAL_STATE_DATA).map((stateData) => stateData[wantedYear]['SA Index']);
-
-    const priceColorScale = d3.scaleLinear() //d3.select("#metric").node().value)
-                      .domain([d3.min(yearStatePrice), d3.max(yearStatePrice)])
-                      .range(["#d7e6f7", "#194475"]); 
-
-    const indexColorScale = d3.scaleLinear() //d3.select("#metric").node().value)
-                      .domain([d3.min(yearIndexHPI), d3.max(yearIndexHPI)])
-                      .range(["#d7e6f7", "#194475"]); 
-    */
-
     // If the scale is set to hpi, base coloring off hpi data
     if (scaleHPI) {
-        // TODO:
+        d3.selectAll(".state").each(function(d) {
+            let curState = d3.select(this);
+            let isSelected = curState.classed("selected");
+            if (!isSelected) { curState.style("fill", globalIndexColorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['SA Index Average'])); }
+        });
     }
     // Otherwise scale off average price
     else {
         d3.selectAll(".state").each(function(d) {
             let curState = d3.select(this);
             let isSelected = curState.classed("selected");
-
-            if (!isSelected) {
-                console.log(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price'])
-                curState.style("fill", globalPriceColorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price']));
-            }
-
+            if (!isSelected) { curState.style("fill", globalPriceColorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price'])); }
         });
     }
 }
