@@ -37,6 +37,12 @@ body{
     z-index: 1000;
 }
 
+.input-div button {
+    margin-left: 10px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+  
 .header-title {
     text-align: center;
     margin: 20px 0;
