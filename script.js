@@ -15,10 +15,28 @@ let selected = {metros: [], states: []};
 let years_list = [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010];
 
 // Global to show if scale is HPI or Avg Price
-let use_HPI = false;
+let scaleHPI = false;
 
 // Dictionary for converting state names
 const STATE_NAME_DICT = {"DC":"District of Columbia", "AL":"Alabama","AK":"Alaska","AZ":"Arizona","AR":"Arkansas","CA":"California","CO":"Colorado","CT":"Connecticut","DE":"Delaware","FL":"Florida","GA":"Georgia","HI":"Hawaii","ID":"Idaho","IL":"Illinois","IN":"Indiana","IA":"Iowa","KS":"Kansas","KY":"Kentucky","LA":"Louisiana","ME":"Maine","MD":"Maryland","MA":"Massachusetts","MI":"Michigan","MN":"Minnesota","MS":"Mississippi","MO":"Missouri","MT":"Montana","NE":"Nebraska","NV":"Nevada","NH":"New Hampshire","NJ":"New Jersey","NM":"New Mexico","NY":"New York","NC":"North Carolina","ND":"North Dakota","OH":"Ohio","OK":"Oklahoma","OR":"Oregon","PA":"Pennsylvania","RI":"Rhode Island","SC":"South Carolina","SD":"South Dakota","TN":"Tennessee","TX":"Texas","UT":"Utah","VT":"Vermont","VA":"Virginia","WA":"Washington","WV":"West Virginia","WI":"Wisconsin","WY":"Wyoming"};
+
+// Setup global colorscales
+let globalPrices = []
+let globalIndexes = []
+    
+Object.values(ANNUAL_STATE_DATA).forEach(state => {
+    state.forEach(instance => {
+        globalPrices.push(instance["Average Price"]);
+        globalIndexes.push(instance["SA Index Average"]);
+    });
+});
+    
+const globalPriceColorScale = d3.scaleLinear()
+                                .domain([d3.min(globalPrices), (d3.max(globalPrices)-d3.min(globalPrices))/2, d3.max(globalPrices)])
+                                .range(["#d7e6f7", "#194475", "#0c1263"]);
+const globalIndexColorScale = d3.scaleLinear()
+                                .domain([d3.min(globalIndexes), (d3.max(globalIndexes)-d3.min(globalIndexes))/2, d3.max(globalIndexes)])
+                                .range(["#d7e6f7", "#194475", "#0c1263"]);
 
 // Initialize the website
 start();
@@ -69,6 +87,8 @@ async function loadData() {
 function generateMap(){
     // remove previous on each refresh
     d3.select('svg').remove();
+    selected.metros = [];
+    selected.states = [];
 
     // Create an svg to hold the map
         let svg = d3.select(".map-div").append("svg")  
@@ -141,7 +161,7 @@ function generateQuarterlyGraph(){
     // Define svg dimensions
     let HEIGHT = 350;
     let WIDTH = 500;
-    let MARGINS = {left: 50, right: 10, top: 75, bottom: 60};
+    let MARGINS = {left: 70, right: 10, top: 75, bottom: 60};
     let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
     let selectedMetros = selected.metros;
     let selectedStates = selected.states;
@@ -171,7 +191,7 @@ function generateQuarterlyGraph(){
     svg.append("text")
     .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) - MARGINS.right - MARGINS.left)
     .attr("y", 65)
-    .text(use_HPI ? "Quarterly State HPI Index in " + years_list[selectedYear] : "Quarterly State Average Price in " + years_list[selectedYear]);
+    .text(scaleHPI ? "Quarterly State HPI Index in " + years_list[selectedYear] : "Quarterly State Average Price in " + years_list[selectedYear]);
 
     // Check if anything nothing is selected
     if ((selected.metros.length === 0) && (selected.states.length === 0)){
@@ -189,63 +209,105 @@ function generateQuarterlyGraph(){
            .attr("x", (0 -(HEIGHT - (MARGINS.top + MARGINS.bottom))/2) - (MARGINS.top + MARGINS.bottom) + 20)
            .attr("y", 15)
            .attr("transform", "rotate(-90)")
-           .text(use_HPI ? "HPI Index" : "Average Price");
+           .text(scaleHPI ? "HPI Index" : "Average Price");
         
         return;
     }
-
-    console.log(QUARTERLY_STATE_DATA);
-    // Iterate through the selected states
-    selectedStates.forEach(stateName => {
-        let quarters = [1,2,3,4]
-        let curState = QUARTERLY_STATE_DATA[stateName];
-        let yValues = []
-
-        // Find the HPI index for each quarter of the current state
-        quarters.forEach(q => {
-            curIndex = (curState.find(instance => instance["Year"] === selectedYear && instance["Quarter"] === q))["SA_Index"];
-            // Add the value to the array of all values as well as the state specific array
-            yAxisValues.push(curIndex);
-            yValues.push(curIndex);
-        });
-
-        // Push the final filtered state data to an array that will be used to create the lines
-        filteredSelectedData.push({name: stateName, indexes: yValues});
-    });
     
-
-    console.log(QUARTERLY_STATE_DATA);
     // Check if using HPI values
-    if (use_HPI) {
+    if (scaleHPI) {
         // If so, filter data using hpi index
+        selectedStates.forEach(stateName => {
+            let quarters = [1,2,3,4]
+            let curState = QUARTERLY_STATE_DATA[stateName];
+            let instances = []
 
+            // Find the HPI index for each quarter of the current state
+            quarters.forEach(q => {
+                found = (curState.find(instance => instance["Year"] === years_list[selectedYear] && instance["Quarter"] === q));
+                curIndexVal = found["SA Index"]
+                // Add the value to the array of all values as well as the state specific array
+                yAxisValues.push(curIndexVal);
+                instances.push(found);
+            });
+
+            // Push the final filtered state data to an array that will be used to create the lines
+            filteredSelectedData.push(instances);
+        });
     }
     // Otherwise, filter the data using avg price
     else {
+        selectedStates.forEach(stateName => {
+            let quarters = [1,2,3,4]
+            let curState = QUARTERLY_STATE_DATA[stateName];
+            let instances = []
 
+            // Find the HPI index for each quarter of the current state
+            quarters.forEach(q => {
+                let found = (curState.find(instance => instance["Year"] === years_list[selectedYear] && instance["Quarter"] === q));
+                let curIndexVal = found["Average Price"]
+                // Add the value to the array of all values as well as the state specific array
+                yAxisValues.push(curIndexVal);
+                instances.push(found);
+            });
+
+            // Push the final filtered state data to an array that will be used to create the lines
+            filteredSelectedData.push(instances);     
+        });
+
+        let yScale = d3.scaleLinear().domain([d3.min(yAxisValues), d3.max(yAxisValues)]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
+        let yAxis = d3.axisLeft().scale(yScale);
+
+        // Add the y-axis to the svg
+        svg.append("g")
+           .attr("id", "y-axis")
+           .attr("transform", "translate(" + MARGINS.left + "," + MARGINS.top + ")")
+           .call(yAxis);
+        svg.append("text")
+           .attr("x", (0 -(HEIGHT - (MARGINS.top + MARGINS.bottom))/2) - (MARGINS.top + MARGINS.bottom) + 20)
+           .attr("y", 15)
+           .attr("transform", "rotate(-90)")
+           .text(scaleHPI ? "HPI Index" : "Average Price");
+
+        // Create the line generator function
+        let lineGenerator = d3.line()
+                              .x(d => xScale(String(d["Quarter"])))
+                              .y(d => yScale(d["Average Price"]));
+        
+        
+        console.log(selectedStates)
+        // Create color scale
+        let colorScale = d3.scaleOrdinal()
+                           .domain(selectedStates)
+                           .range(d3.schemeCategory10);
+
+        // Create the map visualization using the path and data
+        let lines = svg.append("g")
+                       .attr("id", "lines")
+                       .attr("transform", "translate(" + (MARGINS.left) + "," + MARGINS.top + ")");
+
+
+        // Create lines for each group
+        lines.selectAll(".line")
+             .data(filteredSelectedData)
+             .enter()
+             .append("path")
+             .attr("class", "line")
+             .attr("stroke", (instances) => {
+                return colorScale(STATE_NAME_DICT[(instances[0])["State"]]);
+
+             })
+             .attr("stroke-width", 2)
+             .attr("fill", "none")
+             .attr("d", (instances) => lineGenerator(instances));
+                      
     }
 
     // Create scales
     // Create the y axis
     // Append the y axis
-    // Create the line generator function
+
     // Create the lines
-
-     /*
-    alert("clicked");
-    curState = d.properties.name;
-
-    // Open console to see structure of dictionaries
-    console.log('Annual State Data:\n');
-    console.log(ANNUAL_STATE_DATA);
-
-    console.log('Quarterly State Data:\n'); 
-    console.log(QUARTERLY_STATE_DATA);
-
-    // Example usage of a dictionary given a clicked state
-    console.log(curState + "'s avg house price over the years:");
-    ANNUAL_STATE_DATA[curState].forEach(instance => console.log(instance['Year'] + ': ' + instance['Average Price']));
-    */
     
 }
 
@@ -264,7 +326,6 @@ function selectMetro(event, d) {
 
 // PLACEHOLDER: Currently helps show functionality of code
 function selectState(event, d) { 
-    console.log(event)
     // If the metro was already selected, remove it
     if ((selected.states).includes(d.properties.name)) {
         let index = (selected.states).indexOf(d.properties.name);
@@ -281,11 +342,47 @@ function selectState(event, d) {
     generateQuarterlyGraph();
 }
 
+function updateStateColorScale() {
+    const wantedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
+
+    /*
+    //const yearStatePrice = Object.values(ANNUAL_STATE_DATA).map((stateData) => stateData[wantedYear]['Average Price']);
+    //const yearIndexHPI = Object.values(ANNUAL_STATE_DATA).map((stateData) => stateData[wantedYear]['SA Index']);
+
+    const priceColorScale = d3.scaleLinear() //d3.select("#metric").node().value)
+                      .domain([d3.min(yearStatePrice), d3.max(yearStatePrice)])
+                      .range(["#d7e6f7", "#194475"]); 
+
+    const indexColorScale = d3.scaleLinear() //d3.select("#metric").node().value)
+                      .domain([d3.min(yearIndexHPI), d3.max(yearIndexHPI)])
+                      .range(["#d7e6f7", "#194475"]); 
+    */
+
+    // If the scale is set to hpi, base coloring off hpi data
+    if (scaleHPI) {
+        // TODO:
+    }
+    // Otherwise scale off average price
+    else {
+        d3.selectAll(".state").each(function(d) {
+            let curState = d3.select(this);
+            let isSelected = curState.classed("selected");
+
+            if (!isSelected) {
+                console.log(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price'])
+                curState.style("fill", globalPriceColorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price']));
+            }
+
+        });
+    }
+}
+
 // slider
 const slider = d3.select('#year');
 const yearBox = d3.select('#yearBox');
 slider.on('input', function(){
     yearBox.property('value', this.value);
-    generateMap();
+    //generateMap();
+    updateStateColorScale();
     generateQuarterlyGraph();
 });
