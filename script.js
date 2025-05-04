@@ -310,9 +310,20 @@ function generateQuarterlyGraph(){
           .attr("cx", d=> xScale(String(d["Quarter"])))
           .attr("cy", d=> scaleHPI ? yScale(d["SA Index"]) : yScale(d["Average Price"]))
           .attr("r", 3)
-          .style("fill", d=> (colorScale(STATE_NAME_DICT[d["State"]])));
+          .style("fill", d=> (colorScale(STATE_NAME_DICT[d["State"]])))
+          .on("mouseover", function (event, d) {
+            d3.select(this)
+              .transition()
+              .duration(75)
+              .attr("r", 5);
+          })
+          .on("mouseout", function (event, d) {
+            d3.select(this)
+              .transition()
+              .duration(75)
+              .attr("r", 3);
+          });
     });
-    
     
     // Add the y-axis to the svg
     svg.append("g")
