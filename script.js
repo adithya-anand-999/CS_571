@@ -99,7 +99,7 @@ function generateMap(){
                                 .attr("d", path)
                                 .style('fill', (d) => colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price']))
                                 .attr("id", d => d.properties.name)
-                                .on('mouseover', (event, _d) => d3.select(event.currentTarget).style("fill", "#ffd500"))
+                                .on('mouseover', (event, _d) => d3.select(event.currentTarget).style("fill", "#FAC898"))
                                 .on("mouseout", (event, d) => d3.select(event.currentTarget).style("fill", colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price'])))
                                 .on("click", stateCard);
 
