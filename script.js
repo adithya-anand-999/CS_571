@@ -174,7 +174,7 @@ function generateQuarterlyGraph(){
     // Define svg dimensions
     let HEIGHT = 350;
     let WIDTH = 500;
-    let MARGINS = {left: 70, right: 10, top: 75, bottom: 60};
+    let MARGINS = {left: 70, right: 30, top: 75, bottom: 60};
     let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
     let selectedMetros = selected.metros;
     let selectedStates = selected.states;
@@ -197,12 +197,14 @@ function generateQuarterlyGraph(){
     .call(xAxis);
 
     svg.append("text")
-    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) + 20)
+    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) + 40)
     .attr("y", HEIGHT - 30)
     .text("Quarter");
 
+    let hpiTitleX = ((WIDTH - MARGINS.left - MARGINS.right)/2) - MARGINS.left + 20;
+    let priceTitleX = ((WIDTH - MARGINS.left - MARGINS.right)/2)- MARGINS.left;
     svg.append("text")
-    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) - MARGINS.right - MARGINS.left)
+    .attr("x", scaleHPI ? hpiTitleX : priceTitleX)
     .attr("y", 65)
     .text(scaleHPI ? "Quarterly State HPI Index in " + years_list[selectedYear] : "Quarterly State Average Price in " + years_list[selectedYear]);
 
@@ -295,10 +297,18 @@ function generateQuarterlyGraph(){
         .style("stroke-width", 2)
         .attr("fill", "none")
         .attr("d", (instances) => scaleHPI ? indexLineGenerator(instances) : priceLineGenerator(instances));
-    
+
+    // Create points for the lines
     let points = svg.append("g")
                     .attr("id", "points")
                     .attr("transform", "translate(" + (MARGINS.left) + "," + MARGINS.top + ")");
+
+    // Create text element
+    let hoverRect = svg.append("rect").style("fill","white").style("stroke","black").attr("visibility", "hidden");
+    let hoverText = svg.append("text")
+             .style("fill", "black")
+             .style("font-size", "10px")
+             .attr("visibility", "hidden");
 
     filteredSelectedData.forEach(selectedS => {
         points.append("g")
@@ -312,16 +322,45 @@ function generateQuarterlyGraph(){
           .attr("r", 3)
           .style("fill", d=> (colorScale(STATE_NAME_DICT[d["State"]])))
           .on("mouseover", function (event, d) {
+            let textValue = scaleHPI ? d["SA Index"] : d3.format(".3~s")(d["Average Price"]);
             d3.select(this)
               .transition()
               .duration(75)
               .attr("r", 5);
+
+            let mousePos = d3.pointer(event, svg.node());
+            let aboveHalfHeight = mousePos[1] > ((HEIGHT-MARGINS.top-MARGINS.bottom)/2);
+            let pastHalfWidth = mousePos[0] > ((HEIGHT-MARGINS.left-MARGINS.right)/2);
+            let recWidth = scaleHPI ? 30 : 25;
+            let recHeight = scaleHPI ? 10 : 10;
+            let moveLeft = scaleHPI ? 26.2 : 27;
+            let moveRight = scaleHPI ? 10 : 7;
+            
+            hoverText.attr("opacity", 0);
+            hoverRect.attr("opacity", 0);
+            hoverRect.attr("x", pastHalfWidth ? mousePos[0] - moveLeft : mousePos[0] + moveRight)
+                     .attr("y", aboveHalfHeight ? mousePos[1] - 18 : mousePos[1] + 12)
+                     .attr("width", recWidth)
+                     .attr("height", recHeight)
+                     .attr("visibility", "visible");
+            hoverText.text(textValue)
+                     .style("fill", "black")
+                     .style("font-size", 10)
+                     .attr("x", pastHalfWidth ? mousePos[0] - 25 : mousePos[0] + 10)
+                     .attr("y", aboveHalfHeight ? mousePos[1] - 10 : mousePos[1] + 20)
+                     .attr("visibility", "visible");
+            
+            hoverText.transition().duration(200).attr("opacity", 1);
+            hoverRect.transition().duration(200).attr("opacity", 1);
           })
           .on("mouseout", function (event, d) {
             d3.select(this)
               .transition()
               .duration(75)
               .attr("r", 3);
+
+            hoverText.transition().duration(200).attr("opacity", 0);
+            hoverRect.transition().duration(200).attr("opacity", 0);
           });
     });
     
