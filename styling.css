@@ -6,7 +6,9 @@ path {
 }
 
 /* Styling for each state */
-
+.state {
+    fill: none;
+}
 
 .state.selected {
     fill: #FAC898;
@@ -70,3 +72,15 @@ body{
     width: 580px;
     height: 325px;
 }
+
+.input-div button {
+    margin-left: 10px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+  
+.header-title {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 2rem;
+  }

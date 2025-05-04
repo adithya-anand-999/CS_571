@@ -14,15 +14,31 @@ let city_data = [];
 let selected = {metros: [], states: []};
 let years_list = [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010];
 
-// Global to show if scale is HPI or Avg Price
-let scaleHPI = false;
-
 // Dictionary for converting state names
 const STATE_NAME_DICT = {"DC":"District of Columbia", "AL":"Alabama","AK":"Alaska","AZ":"Arizona","AR":"Arkansas","CA":"California","CO":"Colorado","CT":"Connecticut","DE":"Delaware","FL":"Florida","GA":"Georgia","HI":"Hawaii","ID":"Idaho","IL":"Illinois","IN":"Indiana","IA":"Iowa","KS":"Kansas","KY":"Kentucky","LA":"Louisiana","ME":"Maine","MD":"Maryland","MA":"Massachusetts","MI":"Michigan","MN":"Minnesota","MS":"Mississippi","MO":"Missouri","MT":"Montana","NE":"Nebraska","NV":"Nevada","NH":"New Hampshire","NJ":"New Jersey","NM":"New Mexico","NY":"New York","NC":"North Carolina","ND":"North Dakota","OH":"Ohio","OK":"Oklahoma","OR":"Oregon","PA":"Pennsylvania","RI":"Rhode Island","SC":"South Carolina","SD":"South Dakota","TN":"Tennessee","TX":"Texas","UT":"Utah","VT":"Vermont","VA":"Virginia","WA":"Washington","WV":"West Virginia","WI":"Wisconsin","WY":"Wyoming"};
 
 // Initialize global color scales
 let globalPriceColorScale = null;
 let globalIndexColorScale = null;
+
+// Globals to track user preferences
+let citiesVisible = true; // True = show cities, False = don't show cities
+let scaleHPI     = false; // True = user selected HPI scale, False = user selected dollar scale
+
+d3.select('#toggle-cities').on('click', () => {
+    citiesVisible = !citiesVisible;
+    d3.selectAll('.city').style('display', citiesVisible ? 'block' : 'none');
+    d3.select('#toggle-cities').text(citiesVisible ? 'Hide Cities' : 'Show Cities');
+});
+  
+d3.select('#toggle-scale').on('click', () => {
+    scaleHPI = !scaleHPI;
+    d3.select('#toggle-scale').text(scaleHPI ? 'Scale: HPI' : 'Scale: Dollar');
+    // Add logic here to switch between HPI and dollar value scale, it would be best to have a function call. 
+    // You might have to invoke generateMap() as the map itself will change colors with a diff scale. 
+    updateStateColorScale();
+    generateQuarterlyGraph();
+});
 
 // Initialize the website
 start();
