@@ -418,7 +418,6 @@ function selectMetro(event, d) {
     generateQuarterlyGraph();
 }
 
-// PLACEHOLDER: Currently helps show functionality of code
 function selectState(event, d) { 
     // If the metro was already selected, remove it
     if ((selected.states).includes(d.properties.name)) {
@@ -431,13 +430,13 @@ function selectState(event, d) {
         (selected.states).push(d.properties.name);
         event.currentTarget.classList.add("selected");
     }
-
     // Regenerate the quarterly graph nad update the colorscale
     generateQuarterlyGraph();
     updateStateColorScale();
 }
 
 function updateStateColorScale() {
+    // Get current year
     const wantedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
 
     // If the scale is set to hpi, base coloring off hpi data
