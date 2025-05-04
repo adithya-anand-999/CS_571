@@ -57,16 +57,16 @@ body{
 }
 
 #graphs-container {
-    width: 500px;
+    width: 580px;
     height: 650px;
 }
 
 #static-graph {
-    width: 500px;
+    width: 580px;
     height: 325px;
 }
 
 #quarterly-graph {
-    width: 500px;
+    width: 580px;
     height: 325px;
 }

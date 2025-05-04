@@ -174,7 +174,7 @@ function generateQuarterlyGraph(){
     // Define svg dimensions
     let HEIGHT = 350;
     let WIDTH = 500;
-    let MARGINS = {left: 70, right: 30, top: 75, bottom: 60};
+    let MARGINS = {left: 70, right: 45, top: 75, bottom: 60};
     let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
     let selectedMetros = selected.metros;
     let selectedStates = selected.states;
@@ -374,6 +374,19 @@ function generateQuarterlyGraph(){
         .attr("y", 15)
         .attr("transform", "rotate(-90)")
         .text(scaleHPI ? "HPI Index" : "Average Price");
+    
+    // Create labels group
+    let stateLabels = svg.append("g").attr("id", "label-group");
+    // Create labels using sorted data
+    stateLabels.selectAll("text")
+               .data(selectedStates)
+               .join("text")
+    .attr("x", WIDTH - 30)
+    .attr("y", (d,i) => MARGINS.top + (i*15))
+    .text(d => d)
+    .attr("fill", d => colorScale(d));
+
+labels.attr("visibility", "visible");
 }
 
 function selectMetro(event, d) {
