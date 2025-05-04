@@ -1,5 +1,5 @@
 // Constants for the charts
-const MAP_HEIGHT = 700;
+const MAP_HEIGHT = 620;
 const MAP_WIDTH = 900;
 
 // Global for path data
@@ -12,6 +12,9 @@ let city_data = [];
 
 // Global for list of selected states
 let selected = {metros: [], states: []};
+
+// Global to show if scale is HPI or Avg Price
+let use_HPI = false;
 
 // Dictionary for converting state names
 const STATE_NAME_DICT = {"DC":"District of Columbia", "AL":"Alabama","AK":"Alaska","AZ":"Arizona","AR":"Arkansas","CA":"California","CO":"Colorado","CT":"Connecticut","DE":"Delaware","FL":"Florida","GA":"Georgia","HI":"Hawaii","ID":"Idaho","IL":"Illinois","IN":"Indiana","IA":"Iowa","KS":"Kansas","KY":"Kentucky","LA":"Louisiana","ME":"Maine","MD":"Maryland","MA":"Massachusetts","MI":"Michigan","MN":"Minnesota","MS":"Mississippi","MO":"Missouri","MT":"Montana","NE":"Nebraska","NV":"Nevada","NH":"New Hampshire","NJ":"New Jersey","NM":"New Mexico","NY":"New York","NC":"North Carolina","ND":"North Dakota","OH":"Ohio","OK":"Oklahoma","OR":"Oregon","PA":"Pennsylvania","RI":"Rhode Island","SC":"South Carolina","SD":"South Dakota","TN":"Tennessee","TX":"Texas","UT":"Utah","VT":"Vermont","VA":"Virginia","WA":"Washington","WV":"West Virginia","WI":"Wisconsin","WY":"Wyoming"};
@@ -74,7 +77,7 @@ function generateMap(){
      // Convert spherical coordinates to 2D cooordinates 
      let projection = d3.geoAlbersUsa()
      .translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]) // this centers the map in our SVG element
-     .scale([1250]); // this specifies how much to zoom
+     .scale([1200]); // this specifies how much to zoom
 
     // Convert the projected lat/lon coordinates into an SVG path string
     let path = d3.geoPath()
@@ -136,19 +139,80 @@ function generateQuarterlyGraph(){
     // Define svg dimensions
     let HEIGHT = 350;
     let WIDTH = 500;
-    let MARGINS = {left: 40, right: 10, top: 5, bottom: 15}
+    let MARGINS = {left: 50, right: 10, top: 70, bottom: 60}
     let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])
-   
+
+    // Select the right svg and remove previous data
     let svg = d3.select("#quarterly-graph");
+    console.log(svg.node())
     svg.selectAll("*").remove();
 
+    // Append the x-axis (since it doesn't change)
+    let xAxisLabels = ["1", "2", "3", "4"]
+    let xScale = d3.scalePoint().domain(xAxisLabels).range([0, WIDTH - MARGINS.left - MARGINS.right]);
+    let xAxis = d3.axisBottom().scale(xScale);
 
-    // Check if anything if selected
-    if (selected.length === 0){
-        // If not, only generate axis's
-        // Then return
+    svg.append("g")
+    .attr("id", "x-axis")
+    .attr("transform", "translate(" + MARGINS.left + "," + (HEIGHT - MARGINS.bottom) + ")")
+    .call(xAxis);
+
+    svg.append("text")
+    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) + 20)
+    .attr("y", HEIGHT - 30)
+    .text("Quarter");
+
+    // Check if anything nothing is selected
+    if ((selected.metros.length === 0) && (selected.states.length === 0)){
+        // Generate a blank y-axis
+        let yScale = d3.scaleLinear().domain([0, 0]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
+        let yAxis = d3.axisLeft().scale(yScale).ticks(0);
+
+        // Add the y-axis to the svg
+        svg.append("g")
+           .attr("id", "y-axis")
+           .attr("transform", "translate(" + MARGINS.left + "," + MARGINS.top + ")")
+           .call(yAxis);
+        svg.append("text")
+           .attr("x", (0 -(HEIGHT - (MARGINS.top + MARGINS.bottom))/2) - (MARGINS.top + MARGINS.bottom) + 20)
+           .attr("y", 15)
+           .attr("transform", "rotate(-90)")
+           .text(use_HPI ? "HPI Index" : "Average Price");
+        
         return;
     }
+
+    // Check if using HPI values
+    if (use_HPI) {
+        // If so, filter data using hpi index
+
+    }
+    // Otherwise, filter the data using avg price
+    else {
+
+    }
+
+    // Create scales
+    // Create the y axis
+    // Append the y axis
+    // Create the line generator function
+    // Create the lines
+
+     /*
+    alert("clicked");
+    curState = d.properties.name;
+
+    // Open console to see structure of dictionaries
+    console.log('Annual State Data:\n');
+    console.log(ANNUAL_STATE_DATA);
+
+    console.log('Quarterly State Data:\n'); 
+    console.log(QUARTERLY_STATE_DATA);
+
+    // Example usage of a dictionary given a clicked state
+    console.log(curState + "'s avg house price over the years:");
+    ANNUAL_STATE_DATA[curState].forEach(instance => console.log(instance['Year'] + ': ' + instance['Average Price']));
+    */
     
 }
 
@@ -160,7 +224,7 @@ function selectMetro(event, d) {
     }
     // Otherwise, add it
     else { (selected.metros).push(d.Metro_name); }
-    
+
     // Regenerate the quarterly graph
     generateQuarterlyGraph();
 }
@@ -182,22 +246,6 @@ function selectState(event, d) {
 
     // Regenerate the quarterly graph
     generateQuarterlyGraph();
-
-    /*
-    alert("clicked");
-    curState = d.properties.name;
-
-    // Open console to see structure of dictionaries
-    console.log('Annual State Data:\n');
-    console.log(ANNUAL_STATE_DATA);
-
-    console.log('Quarterly State Data:\n'); 
-    console.log(QUARTERLY_STATE_DATA);
-
-    // Example usage of a dictionary given a clicked state
-    console.log(curState + "'s avg house price over the years:");
-    ANNUAL_STATE_DATA[curState].forEach(instance => console.log(instance['Year'] + ': ' + instance['Average Price']));
-    */
 }
 
 // slider

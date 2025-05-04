@@ -46,28 +46,27 @@ body{
   }
 
 #vis-container {
-    width: 1400px;
-    height: 700px;
+    width: 1460px;
+    height: 650px;
     display:flex;
 }
 
 #map-svg {
     width: 900px;
-    height: 700px;
+    height: 650px;
 }
 
 #graphs-container {
     width: 500px;
-    height: 700px;
-}
-
-#quarterly-graph {
-    width: 500px;
-    height: 350px;
+    height: 650px;
 }
 
 #static-graph {
     width: 500px;
-    height: 350px;
+    height: 325px;
 }
 
+#quarterly-graph {
+    width: 500px;
+    height: 325px;
+}
