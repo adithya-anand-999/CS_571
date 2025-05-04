@@ -154,14 +154,13 @@ function generateQuarterlyGraph(){
 
 function selectMetro(event, d) {
     // If the metro was already selected, remove it
-    if ((selected.metros).includes(d.properties.name)) {
-        let index = (selected.metros).indexOf(d.properties.name);
+    if ((selected.metros).includes(d.Metro_name)) {
+        let index = (selected.metros).indexOf(d.Metro_name);
         (selected.metros).splice(index, 1);
     }
-
     // Otherwise, add it
-    else { (selected.metros).push(d.properties.name); }
-
+    else { (selected.metros).push(d.Metro_name); }
+    
     // Regenerate the quarterly graph
     generateQuarterlyGraph();
 }
@@ -180,7 +179,7 @@ function selectState(event, d) {
         (selected.states).push(d.properties.name);
         event.currentTarget.classList.add("selected");
     }
-    console.log(selected.states);
+
     // Regenerate the quarterly graph
     generateQuarterlyGraph();
 
