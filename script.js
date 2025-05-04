@@ -17,6 +17,24 @@ const STATE_NAME_DICT = {"DC":"District of Columbia", "AL":"Alabama","AK":"Alask
 // global variable to load in unique cities
 let city_data = []
 
+// global variables for the toggles 
+let citiesVisible = true; // True = show cities, False = don't show cities
+let scaleHPI     = false; // True = user selected HPI scale, False = user selected dollar scale
+
+
+d3.select('#toggle-cities').on('click', () => {
+    citiesVisible = !citiesVisible;
+    d3.selectAll('.city').style('display', citiesVisible ? 'block' : 'none');
+    d3.select('#toggle-cities').text(citiesVisible ? 'Hide Cities' : 'Show Cities');
+});
+  
+d3.select('#toggle-scale').on('click', () => {
+    scaleHPI = !scaleHPI;
+    d3.select('#toggle-scale').text(scaleHPI ? 'Scale: HPI' : 'Scale: Dollar');
+    // Add logic here to switch between HPI and dollar value scale, it would be best to have a function call. 
+    // You might have to invoke generateMap() as the map itself will change colors with a diff scale. 
+});
+
 // Initialize the website
 start();
 
@@ -102,7 +120,8 @@ function generateMap(){
                                 .on('mouseover', (event, _d) => d3.select(event.currentTarget).style("fill", "#ffd500"))
                                 .on("mouseout", (event, d) => d3.select(event.currentTarget).style("fill", colorScale(((ANNUAL_STATE_DATA[d.properties.name])[wantedYear])['Average Price'])))
                                 .on("click", stateCard);
-
+                   
+                                
     //adding city points to map
     svg.selectAll('.city')
         .data(city_data)
