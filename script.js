@@ -50,7 +50,6 @@ d3.select('#toggle-scale').on('click', () => {
 });
 
 d3.select('#toggle-static-graph').on('click', () => {
-    console.log(medianStatic);
     medianStatic = !medianStatic;
     d3.select('#toggle-static-graph').text(medianStatic ? 'Graph: Median' : 'Graph: Average' );
     generate10YearGraph();
@@ -309,7 +308,7 @@ function generateQuarterlyGraph(){
     // Define svg dimensions
     let HEIGHT = 375;
     let WIDTH = 500;
-    let MARGINS = {left: 70, right: 45, top: 75, bottom: 70};
+    let MARGINS = {left: 60, right: 45, top: 75, bottom: 70};
     let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
     let selectedStates = selected.states;
     let filteredSelectedData = [];
@@ -330,16 +329,16 @@ function generateQuarterlyGraph(){
     .call(xAxis);
 
     svg.append("text")
-    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) + 40)
-    .attr("y", HEIGHT - 30)
+    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) + 36)
+    .attr("y", HEIGHT - 32)
     .text("Quarter");
 
-    let hpiTitleX = ((WIDTH - MARGINS.left - MARGINS.right)/2) - MARGINS.left + 20;
+    let hpiTitleX = ((WIDTH - MARGINS.left - MARGINS.right)/2) - MARGINS.left + 40;
     let priceTitleX = ((WIDTH - MARGINS.left - MARGINS.right)/2)- MARGINS.left;
     svg.append("text")
     .attr("x", scaleHPI ? hpiTitleX : priceTitleX)
-    .attr("y", 65)
-    .text(scaleHPI ? "Quarterly State HPI Index in " + years_list[selectedYear] : "Quarterly State Average Price in " + years_list[selectedYear]);
+    .attr("y", 55)
+    .text(scaleHPI ? "Quarterly State HPI in " + years_list[selectedYear] : "Quarterly State Average Price in " + years_list[selectedYear]);
 
     // Check if nothing is selected
     if ((selected.metros.length === 0) && (selected.states.length === 0)){
@@ -401,7 +400,7 @@ function generateQuarterlyGraph(){
 
     // Declare y axis
     let yScale = d3.scaleLinear().domain([d3.min(yAxisValues), d3.max(yAxisValues)]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
-    let yAxis = d3.axisLeft().scale(yScale);
+    let yAxis = d3.axisLeft().scale(yScale).tickFormat(d3.format(".3~s"));
 
     // Create the line generator function
     let priceLineGenerator = d3.line()
@@ -525,7 +524,7 @@ function generate10YearGraph() {
     // Define svg dimensions
     let HEIGHT = 375;
     let WIDTH = 500;
-    let MARGINS = {left: 70, right: 45, top: 75, bottom: 70};
+    let MARGINS = {left: 60, right: 45, top: 75, bottom: 70};
     let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
     let selectedStates = selected.states;
     let filteredSelectedData = [];
@@ -546,11 +545,61 @@ function generate10YearGraph() {
     .call(xAxis);
 
     svg.append("text")
-    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) + 40)
+    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) + 45)
     .attr("y", HEIGHT - 30)
     .text("Year");
 
-    console.log(US_DATA);
+    // Positions for the respective title options
+    let medianTitlePos = ((WIDTH - MARGINS.left - MARGINS.right)/2) - MARGINS.left;
+    let avgTitlePos = ((WIDTH - MARGINS.left - MARGINS.right)/2)- MARGINS.left;
+
+    // Append the title of the graph
+    svg.append("text")
+    .attr("x", medianStatic ? medianTitlePos : avgTitlePos)
+    .attr("y", 55)
+    .text(medianStatic ? "Median US Prices from 2000-2010" : "Average US Prices from 2000-2010");
+
+    // Filter data
+    if (medianStatic) { US_DATA.forEach(instance => yAxisValues.push(instance["Median Price Average"])); }
+    else { US_DATA.forEach(instance => yAxisValues.push(instance["Average Price"])); }
+
+    // Declare y axis
+    let yScale = d3.scaleLinear().domain([d3.min(yAxisValues), d3.max(yAxisValues)]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
+    let yAxis = d3.axisLeft().scale(yScale).tickFormat(d3.format(".3~s"));
+
+    // Add the y-axis to the svg
+    svg.append("g")
+        .attr("id", "y-axis")
+        .attr("transform", "translate(" + MARGINS.left + "," + MARGINS.top + ")")
+        .call(yAxis);
+    svg.append("text")
+        .attr("x", (0 -(HEIGHT - (MARGINS.top + MARGINS.bottom))/2) - (MARGINS.top + MARGINS.bottom) + 20)
+        .attr("y", 15)
+        .attr("transform", "rotate(-90)")
+        .text(medianStatic ? "Median Price" : "Average Price");
+
+    // Create the line generator function
+    let medianLineGenerator = d3.line()
+                       .x(d => xScale(String(d["Year"])))
+                       .y(d => yScale(d["Median Price Average"]));
+    let avgLineGenerator = d3.line()
+                       .x(d => xScale(String(d["Year"])))
+                       .y(d => yScale(d["Average Price"])); 
+
+    // Create the map visualization using the path and data
+    let line = svg.append("g")
+                   .attr("id", "us-line")
+                   .attr("transform", "translate(" + (MARGINS.left) + "," + MARGINS.top + ")");
+
+    // Create the line
+    line.append("path")
+        .datum(US_DATA)
+        .attr("class", "line")
+        .style("stroke", "#f38000")
+        .style("stroke-width", 2)
+        .attr("fill", "none")
+        .attr("d", medianStatic ? medianLineGenerator : avgLineGenerator);
+ 
 
 }
 
