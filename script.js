@@ -39,11 +39,12 @@ d3.select('#toggle-cities').on('click', () => {
 d3.select('#toggle-scale').on('click', () => {
     scaleHPI = !scaleHPI;
     d3.select('#toggle-scale').text(scaleHPI ? 'Scale: HPI' : 'Scale: Dollar');
-    // Add logic here to switch between HPI and dollar value scale, it would be best to have a function call. 
-    // You might have to invoke generateMap() as the map itself will change colors with a diff scale. 
+
+    // Update the map coloring, legend, and graphs
     updateStateColorScale();
     generateQuarterlyGraph();
     generateLegend();
+    generate10YearGraph();
 });
 
 // Initialize the website
@@ -79,6 +80,7 @@ async function start() {
     generateMap();
     generateQuarterlyGraph(); 
     generateLegend();
+    generate10YearGraph();
     
 }   
 
@@ -276,9 +278,9 @@ function generateLegend() {
 
 function generateQuarterlyGraph(){
     // Define svg dimensions
-    let HEIGHT = 350;
+    let HEIGHT = 375;
     let WIDTH = 500;
-    let MARGINS = {left: 70, right: 45, top: 75, bottom: 60};
+    let MARGINS = {left: 70, right: 45, top: 75, bottom: 70};
     let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
     let selectedStates = selected.states;
     let filteredSelectedData = [];
@@ -286,7 +288,6 @@ function generateQuarterlyGraph(){
 
     // Select the right svg and remove previous data
     let svg = d3.select("#quarterly-graph");
-    console.log(svg.node())
     svg.selectAll("*").remove();
 
     // Append the x-axis (since it doesn't change)
@@ -491,6 +492,40 @@ function generateQuarterlyGraph(){
 
 }
 
+function generate10YearGraph() {
+    // Define svg dimensions
+    let HEIGHT = 375;
+    let WIDTH = 500;
+    let MARGINS = {left: 70, right: 45, top: 75, bottom: 70};
+    let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
+    let selectedStates = selected.states;
+    let filteredSelectedData = [];
+    let yAxisValues = [];
+
+    // Select the right svg and remove previous data
+    let svg = d3.select("#static-graph");
+    svg.selectAll("*").remove();
+
+    // Append the x-axis (since it doesn't change)
+    let xAxisLabels = ["2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010"]
+    let xScale = d3.scalePoint().domain(xAxisLabels).range([0, WIDTH - MARGINS.left - MARGINS.right]);
+    let xAxis = d3.axisBottom().scale(xScale);
+
+    svg.append("g")
+    .attr("id", "x-axis")
+    .attr("transform", "translate(" + MARGINS.left + "," + (HEIGHT - MARGINS.bottom) + ")")
+    .call(xAxis);
+
+    svg.append("text")
+    .attr("x", ((WIDTH - MARGINS.left - MARGINS.right)/2) + 40)
+    .attr("y", HEIGHT - 30)
+    .text("Year");
+
+    console.log(ANNUAL_STATE_DATA);
+    console.log(city_data);
+
+}
+
 function selectMetro(event, d) {
     // If the metro was already selected, remove it
     if ((selected.metros).includes(d.Metro_name)) {
@@ -548,7 +583,6 @@ const slider = d3.select('#year');
 const yearBox = d3.select('#yearBox');
 slider.on('input', function(){
     yearBox.property('value', this.value);
-    //generateMap();
     updateStateColorScale();
     generateQuarterlyGraph();
 });

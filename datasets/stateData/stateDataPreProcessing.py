@@ -80,6 +80,13 @@ cleaned_price_df = cleaned_price_df.rename(columns = {'Year-Quarter':'Year', 'Me
 
 ''' GROUP THE DATAFRAMES '''
 grouped_df = pd.merge(cleaned_state_df, cleaned_price_df, on = ['State', 'Year'], how = 'outer')
+
+# Create US data
+US_df = grouped_df[grouped_df['State']=='US']
+US_df = US_df.drop('NSA Index Average', axis=1)
+US_df = US_df.drop('SA Index Average', axis=1)
+
+# Finish cleanup for the normal data
 grouped_df = grouped_df[grouped_df['State']!='US'] # removed rows with US for coloring purposes
 final_quarterly_df = pd.merge(quarterly_df, quarterly_price_df, on=['State', 'Year', 'Quarter'], how = 'outer')
 final_quarterly_df = final_quarterly_df[final_quarterly_df['State']!='US'] # removed rows with US for coloring purposes
@@ -90,3 +97,4 @@ print(grouped_df)
 grouped_df.to_json('./datasets/jsonFiles/annualStateData.json', orient='records', lines=False)
 #quarterly_df.to_json('./datasets/jsonFiles/quarterlyStateData.json', orient='records', lines=False)
 final_quarterly_df.to_json('./datasets/jsonFiles/quarterlyStateData.json', orient='records', lines=False)
+US_df.to_json('./datasets/jsonFiles/fullCountryData.json', orient='records', lines=False)
