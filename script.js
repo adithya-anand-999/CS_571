@@ -525,9 +525,6 @@ function generate10YearGraph() {
     let HEIGHT = 375;
     let WIDTH = 500;
     let MARGINS = {left: 60, right: 45, top: 75, bottom: 70};
-    let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
-    let selectedStates = selected.states;
-    let filteredSelectedData = [];
     let yAxisValues = [];
 
     // Select the right svg and remove previous data
@@ -595,7 +592,7 @@ function generate10YearGraph() {
     line.append("path")
         .datum(US_DATA)
         .attr("class", "line")
-        .style("stroke", "#f38000")
+        .style("stroke", medianStatic ? "steelblue" : "#f38000")
         .style("stroke-width", 2)
         .attr("fill", "none")
         .attr("d", medianStatic ? medianLineGenerator : avgLineGenerator);
@@ -618,7 +615,7 @@ function generate10YearGraph() {
           .attr("cx", d=> xScale(String(d["Year"])))
           .attr("cy", d=> medianStatic ? yScale(d["Median Price Average"]) : yScale(d["Average Price"]))
           .attr("r", 3)
-          .style("fill", "#f38000")
+          .style("fill", medianStatic ? "steelblue" : "#f38000")
           .on("mouseover", function (event, d) {
             let textValue = medianStatic ? d3.format(".3~s")(d["Median Price Average"]) : d3.format(".3~s")(d["Average Price"]);
             d3.select(this)
