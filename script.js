@@ -463,21 +463,21 @@ function generateQuarterlyGraph(){
             let mousePos = d3.pointer(event, svg.node());
             let aboveHalfHeight = mousePos[1] > ((HEIGHT-MARGINS.top-MARGINS.bottom)/2);
             let pastHalfWidth = mousePos[0] > ((HEIGHT-MARGINS.left-MARGINS.right)/2);
-            let recWidth = scaleHPI ? 30 : 25;
-            let recHeight = scaleHPI ? 10 : 10;
+            let recWidth = scaleHPI ? 35 : 30;
+            let recHeight = scaleHPI ? 12 : 12;
             let moveLeft = scaleHPI ? 26.2 : 27;
             let moveRight = scaleHPI ? 10 : 7;
             
             hoverText.attr("opacity", 0);
             hoverRect.attr("opacity", 0);
             hoverRect.attr("x", pastHalfWidth ? mousePos[0] - moveLeft : mousePos[0] + moveRight)
-                     .attr("y", aboveHalfHeight ? mousePos[1] - 18 : mousePos[1] + 12)
+                     .attr("y", aboveHalfHeight ? mousePos[1] - 20 : mousePos[1] + 10)
                      .attr("width", recWidth)
                      .attr("height", recHeight)
                      .attr("visibility", "visible");
             hoverText.text(textValue)
                      .style("fill", "black")
-                     .style("font-size", 10)
+                     .style("font-size", 12)
                      .attr("x", pastHalfWidth ? mousePos[0] - 25 : mousePos[0] + 10)
                      .attr("y", aboveHalfHeight ? mousePos[1] - 10 : mousePos[1] + 20)
                      .attr("visibility", "visible");
@@ -599,8 +599,63 @@ function generate10YearGraph() {
         .style("stroke-width", 2)
         .attr("fill", "none")
         .attr("d", medianStatic ? medianLineGenerator : avgLineGenerator);
- 
 
+    // Create points for the lines
+    let points = svg.append("g")
+                    .attr("transform", "translate(" + (MARGINS.left) + "," + MARGINS.top + ")");
+
+    // Create text element
+    let hoverRect = svg.append("rect").style("fill","white").style("stroke","black").attr("visibility", "hidden");
+    let hoverText = svg.append("text")
+                       .style("fill", "black")
+                       .style("font-size", "10px")
+                       .attr("visibility", "hidden");
+
+    points.selectAll("circle")
+          .data(US_DATA)
+          .enter()
+          .append("circle")
+          .attr("cx", d=> xScale(String(d["Year"])))
+          .attr("cy", d=> medianStatic ? yScale(d["Median Price Average"]) : yScale(d["Average Price"]))
+          .attr("r", 3)
+          .style("fill", "#f38000")
+          .on("mouseover", function (event, d) {
+            let textValue = medianStatic ? d3.format(".3~s")(d["Median Price Average"]) : d3.format(".3~s")(d["Average Price"]);
+            d3.select(this)
+              .transition()
+              .duration(75)
+              .attr("r", 5);
+
+            let mousePos = d3.pointer(event, svg.node());
+            let aboveHalfHeight = mousePos[1] > ((HEIGHT-MARGINS.top-MARGINS.bottom)/2);
+            let pastHalfWidth = mousePos[0] > ((HEIGHT-MARGINS.left-MARGINS.right)/2);
+          
+            hoverText.attr("opacity", 0);
+            hoverRect.attr("opacity", 0);
+            hoverRect.attr("x", pastHalfWidth ? mousePos[0] - 31 : mousePos[0] + 9)
+                     .attr("y", aboveHalfHeight ? mousePos[1] - 24 : mousePos[1] + 12)
+                     .attr("width", 27)
+                     .attr("height", 14)
+                     .attr("visibility", "visible");
+            hoverText.text(textValue)
+                     .style("fill", "black")
+                     .style("font-size", 12)
+                     .attr("x", pastHalfWidth ? mousePos[0] - 30 : mousePos[0] + 10)
+                     .attr("y", aboveHalfHeight ? mousePos[1] - 13 : mousePos[1] + 23)
+                     .attr("visibility", "visible");
+          
+            hoverText.transition().duration(200).attr("opacity", 1);
+            hoverRect.transition().duration(200).attr("opacity", 1);
+          })
+          .on("mouseout", function (event, d) {
+            d3.select(this)
+              .transition()
+              .duration(75)
+              .attr("r", 3);
+
+            hoverText.transition().duration(200).attr("opacity", 0);
+            hoverRect.transition().duration(200).attr("opacity", 0);
+          });
 }
 
 function selectMetro(event, d) {
