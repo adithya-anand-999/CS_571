@@ -19,7 +19,12 @@ const STATE_NAME_DICT = {"DC":"District of Columbia", "AL":"Alabama","AK":"Alask
 
 // Initialize global color scales
 let globalPriceColorScale = null;
+let globalPriceMin = null;
+let globalPriceMax = null;
 let globalIndexColorScale = null;
+let globalIndexMin = null;
+let globalIndexMax = null;
+
 
 // Globals to track user preferences
 let citiesVisible = true; // True = show cities, False = don't show cities
@@ -38,6 +43,7 @@ d3.select('#toggle-scale').on('click', () => {
     // You might have to invoke generateMap() as the map itself will change colors with a diff scale. 
     updateStateColorScale();
     generateQuarterlyGraph();
+    generateLegend();
 });
 
 // Initialize the website
@@ -58,15 +64,21 @@ async function start() {
             globalIndexes.push(instance["SA Index Average"]);
         });
     });
+
+    globalIndexMin = d3.min(globalIndexes);
+    globalIndexMax = d3.max(globalIndexes);
+    globalPriceMin = d3.min(globalPrices);
+    globalPriceMax = d3.max(globalPrices);
         
     globalPriceColorScale = d3.scaleLinear()
-                                    .domain([d3.min(globalPrices), (d3.max(globalPrices)-d3.min(globalPrices))/2, d3.max(globalPrices)])
+                                    .domain([globalPriceMin, (globalPriceMax-globalPriceMin)/2, globalPriceMax])
                                     .range(["#d7e6f7", "#194475", "#0c1263"]);
     globalIndexColorScale = d3.scaleLinear()
-                                    .domain([d3.min(globalIndexes), d3.max(globalIndexes)])
+                                    .domain([globalIndexMin, globalIndexMax])
                                     .range(["#d7e6f7", "#194475"]);
     generateMap();
     generateQuarterlyGraph(); 
+    generateLegend();
     
 }   
 
@@ -111,30 +123,21 @@ function generateMap(){
     selected.states = [];
 
     // Create an svg to hold the map
-        let svg = d3.select(".map-div").append("svg")  
-                                       .attr("id", "map-svg")
-                                       .attr("height", MAP_HEIGHT)
-                                       .attr("width", MAP_WIDTH);
+    let svg = d3.select(".map-div").append("svg")  
+                                   .attr("id", "map-svg")
+                                   .attr("height", MAP_HEIGHT)
+                                   .attr("width", MAP_WIDTH);
 
      // Convert spherical coordinates to 2D cooordinates 
-     let projection = d3.geoAlbersUsa()
-     .translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]) // this centers the map in our SVG element
-     .scale([1200]); // this specifies how much to zoom
+    let projection = d3.geoAlbersUsa()
+                       .translate([MAP_WIDTH / 2, MAP_HEIGHT / 2]) // this centers the map in our SVG element
+                       .scale([1200]); // this specifies how much to zoom
 
     // Convert the projected lat/lon coordinates into an SVG path string
     let path = d3.geoPath()
               .projection(projection);
 
-    const wantedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))])
-
-    /*
-    const yearStatePrice = Object.values(ANNUAL_STATE_DATA).map((stateData) => stateData[wantedYear]['Average Price'])
-    console.log(yearStatePrice)
-
-    const colorScale = d3.scaleLinear() //d3.select("#metric").node().value)
-                      .domain([d3.min(yearStatePrice), d3.max(yearStatePrice)])
-                      .range(["#d7e6f7", "#194475"]); 
-    */
+    const wantedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
 
     // Create states
     let states = svg.selectAll(".state")
@@ -186,13 +189,97 @@ function generateMap(){
     });
 }
 
+function generateLegend() {
+    // Clear previous version
+    d3.select("#legend").selectAll("svg").remove();
+    d3.select("#scale").selectAll("svg").remove();
+
+    // creates the legend
+    const legend = d3.select('#legend')
+                     .append('svg')
+                     .attr("height", 50)
+    let min = null;
+    let max = null;
+    
+    // dot
+    const dotGroup = legend.append('g')
+
+    dotGroup.attr('transform', `translate(0, 12)`)
+
+    dotGroup.append("circle")
+          .attr("cx", 5)
+          .attr("cy", 5)
+          .attr("r", 5)
+          .attr("fill", "#ff6700")
+
+    dotGroup.append('text')
+          .attr("x", 20)     
+          .attr("y", 5)    
+          .text("Metropolitan Area")
+          .style("font-size", "16px")
+          .attr("alignment-baseline", "middle");
+
+    // Color Scale
+    let scaleSvg = d3.select("#scale").append("svg");
+    const color = scaleSvg.append('g')
+                          .attr('x', 0)
+                          .attr('y', 0);
+
+    // create gradient
+    const defs = scaleSvg.append("defs"); 
+    const linearGradient = defs.append("linearGradient")
+                               .attr("id", "color-gradient")
+                               .attr("x1", "0%")    //gradient start
+                               .attr("y1", "0%")
+                               .attr("x2", "100%")  // gradient end
+                               .attr("y2", "0%");
+    
+    linearGradient.append("stop")
+                  .attr("offset", "0%")
+                  .attr("stop-color", "#d7e6f7");
+    
+    if (scaleHPI) {
+        min = globalIndexMin;
+        max = globalIndexMax;
+        linearGradient.append("stop")
+                  .attr("offset", "100%")
+                  .attr("stop-color", "#194475");
+    }
+    else {
+        min = d3.format(".3~s")(globalPriceMin);
+        max = d3.format(".3~s")(globalPriceMax);
+        linearGradient.append("stop")
+                  .attr("offset", "50%")
+                  .attr("stop-color", "#194475");
+        linearGradient.append("stop")
+                  .attr("offset", "100%")
+                  .attr("stop-color", "#0c1263");
+    }
+
+    color.append('text')
+         .attr('x', 0)
+         .attr('y', 40)
+         .text(min);
+
+    color.append('rect')
+         .attr('x', 0)
+         .attr('y', 5)
+         .attr('width', 250)
+         .attr('height', 20)
+         .attr('fill',  "url(#color-gradient)");
+
+    color.append('text')
+         .attr('x', 220)
+         .attr('y', 40)
+         .text(max);
+}
+
 function generateQuarterlyGraph(){
     // Define svg dimensions
     let HEIGHT = 350;
     let WIDTH = 500;
     let MARGINS = {left: 70, right: 45, top: 75, bottom: 60};
     let selectedYear = d3.min([9, parseInt(d3.select('#year').node().value.substring(2))]);
-    let selectedMetros = selected.metros;
     let selectedStates = selected.states;
     let filteredSelectedData = [];
     let yAxisValues = [];
@@ -402,7 +489,6 @@ function generateQuarterlyGraph(){
     .text(d => d)
     .attr("fill", d => colorScale(d));
 
-labels.attr("visibility", "visible");
 }
 
 function selectMetro(event, d) {

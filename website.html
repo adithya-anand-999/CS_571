@@ -19,12 +19,22 @@
                 <svg id="static-graph"></svg>
             </div>
         </div>
-        <div class = "input-div" id = "input">
-            <label for="yearBox">Year:</label>
-            <input type="number" id="yearBox" class="year-input" min="2000" max="2010" value="2000" readonly>
-            <input id = "year" type="range" min="2000" max="2010" value="2000">
-            <button id="toggle-cities">Hide Cities</button>
-            <button id="toggle-scale">Scale: Dollar</button>
+        <div id="lower-container"> 
+            <div class = "input-div" id = "input">
+                <label for="yearBox">Year:</label>
+                <input type="number" id="yearBox" class="year-input" min="2000" max="2010" value="2000" readonly>
+                <input id = "year" type="range" min="2000" max="2010" value="2000">
+                <button id="toggle-cities">Hide Cities</button>
+                <button id="toggle-scale">Scale: Dollar</button>
+            </div>
+            <div id = "scale-legend-container">
+                <div class = "legend" id = "legend"></divclass><b>Legend:</b></div>
+                <div class = "scale" id = "scale"></divclass><b>Scale:</b></div>
+            </div>
+            <div id = "HPI-blurb">
+                <b>What's HPI?</b>
+                <p>INSERT INFO HERE</p>
+            </div>
         </div>
         <div id="city-info-card" class="info-card" style="display: none;"></div>
     </body>
