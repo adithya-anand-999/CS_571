@@ -55,6 +55,24 @@ d3.select('#toggle-static-graph').on('click', () => {
     generate10YearGraph();
 });
 
+// global variables for the toggles 
+let citiesVisible = true; // True = show cities, False = don't show cities
+let scaleHPI     = false; // True = user selected HPI scale, False = user selected dollar scale
+
+
+d3.select('#toggle-cities').on('click', () => {
+    citiesVisible = !citiesVisible;
+    d3.selectAll('.city').style('display', citiesVisible ? 'block' : 'none');
+    d3.select('#toggle-cities').text(citiesVisible ? 'Hide Cities' : 'Show Cities');
+});
+  
+d3.select('#toggle-scale').on('click', () => {
+    scaleHPI = !scaleHPI;
+    d3.select('#toggle-scale').text(scaleHPI ? 'Scale: HPI' : 'Scale: Dollar');
+    // Add logic here to switch between HPI and dollar value scale, it would be best to have a function call. 
+    // You might have to invoke generateMap() as the map itself will change colors with a diff scale. 
+});
+
 // Initialize the website
 start();
 
