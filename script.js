@@ -8,6 +8,7 @@ let PATH_DATA;
 // Global dictionaries for our data
 let ANNUAL_STATE_DATA = {};
 let QUARTERLY_STATE_DATA = {};
+let US_DATA = [];
 let city_data = [];
 
 // Global for list of selected states
@@ -29,6 +30,7 @@ let globalIndexMax = null;
 // Globals to track user preferences
 let citiesVisible = true; // True = show cities, False = don't show cities
 let scaleHPI     = false; // True = user selected HPI scale, False = user selected dollar scale
+let medianStatic = true; // True = user selected median for the static graph, False = user selected average price
 
 d3.select('#toggle-cities').on('click', () => {
     citiesVisible = !citiesVisible;
@@ -44,6 +46,13 @@ d3.select('#toggle-scale').on('click', () => {
     updateStateColorScale();
     generateQuarterlyGraph();
     generateLegend();
+    generate10YearGraph();
+});
+
+d3.select('#toggle-static-graph').on('click', () => {
+    console.log(medianStatic);
+    medianStatic = !medianStatic;
+    d3.select('#toggle-static-graph').text(medianStatic ? 'Graph: Median' : 'Graph: Average' );
     generate10YearGraph();
 });
 
@@ -103,6 +112,7 @@ async function loadData() {
     await d3.json("./datasets/jsonFiles/us-states.json").then(data => PATH_DATA = data);
     await d3.json("./datasets/jsonFiles/annualStateData.json").then(data => populateDictionary(data, ANNUAL_STATE_DATA));
     await d3.json("./datasets/jsonFiles/quarterlyStateData.json").then(data => populateDictionary(data, QUARTERLY_STATE_DATA));
+    await d3.json("./datasets/jsonFiles/fullCountryData.json").then(data => data.forEach(row => US_DATA.push(row)));
 
     //Parsing cities
     metro_data_file_path = "./datasets/jsonFiles/metro_data.json"
@@ -170,25 +180,44 @@ function generateMap(){
         .attr("cy", d => projection([d.Cords[1], d.Cords[0]])[1])
         .attr("r", 4)
         .style("fill", "#ff6700")
+        .on("mouseover", function (event, d) {
+            d3.select(this)
+              .transition()
+              .duration(75)
+              .attr("r", 5); 
+        })
+        .on("mouseout", function (event, d) {
+            d3.select(this)
+              .transition()
+              .duration(75)
+              .attr("r", 4);
+            d3.select("#city-info-card")
+              .transition()
+              .duration(400)
+              .style("opacity", 0); 
+        })
         // below brings up a card with the metro name
         .on("click", (event, d) => {
+            console.log(d);
             const card = d3.select("#city-info-card");
             card.style("display", "block")
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY - 20) + "px")
-                .html(`<strong>Metro:</strong> ${d.Metro_name}`);
+                .html(`<strong>Metro:</strong> ${d.Metro_name}<br><strong>HPI:</strong> ${d.HPI_SA}`)
+                .style("opacity", 100);
             selectMetro(event,d);
         })
         // below does a hover for metro name
         .append("title")
         .text(d => d.Metro_name);
-    
+    /*
     d3.select("body").on("click", function(event) {
         const isCity = event.target.classList.contains("city");
         if (!isCity) {
             d3.select("#city-info-card").style("display", "none");
         }
     });
+    */
 }
 
 function generateLegend() {
@@ -521,8 +550,7 @@ function generate10YearGraph() {
     .attr("y", HEIGHT - 30)
     .text("Year");
 
-    console.log(ANNUAL_STATE_DATA);
-    console.log(city_data);
+    console.log(US_DATA);
 
 }
 
