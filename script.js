@@ -56,8 +56,8 @@ d3.select('#toggle-static-graph').on('click', () => {
 });
 
 // global variables for the toggles 
-let citiesVisible = true; // True = show cities, False = don't show cities
-let scaleHPI     = false; // True = user selected HPI scale, False = user selected dollar scale
+// let citiesVisible = true; // True = show cities, False = don't show cities
+// let scaleHPI     = false; // True = user selected HPI scale, False = user selected dollar scale
 
 
 d3.select('#toggle-cities').on('click', () => {
