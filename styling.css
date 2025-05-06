@@ -54,6 +54,9 @@ body{
 
 /* CSS For Map and Graphs Sizing */
 #map-svg {
+    position: absolute;
+    top: 85px;
+    left: 27px;
     width: 900px;
     height: 650px;
 }
@@ -72,6 +75,9 @@ body{
 }
 
 #quarterly-graph {
+    position: absolute;
+    top: 88px;
+    left: 926px;
     width: 580px;
     height: 370px;
 }
