@@ -5,16 +5,24 @@ path {
     pointer-events: visibleFill;
 }
 
-/* Styling for each state */
-.state {
-    fill: none;
-}
-
+/* Basic CSS */
 body{
     display: flex;
     flex-direction: column;
     justify-content: center;
     justify-self: center;
+}
+
+.header-title {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 2rem;
+  }
+
+
+/* CSS for states and city/metros */
+.state.selected {
+    fill: #FAC898;
 }
 
 .city {
@@ -37,14 +45,92 @@ body{
     z-index: 1000;
 }
 
+/* CSS for orienting map next to graphs */
+#vis-container {
+    width: 1460px;
+    height: 750px;
+    display:flex;
+}
+
+/* CSS For Map and Graphs Sizing */
+#map-svg {
+    position: absolute;
+    top: 85px;
+    left: 27px;
+    width: 900px;
+    height: 650px;
+}
+
+#graphs-container {
+    width: 580px;
+    height: 750px;
+}
+
+#static-graph {
+    position: absolute;
+    top: 460px;
+    left: 926px;
+    width: 580px;
+    height: 370px;
+}
+
+#quarterly-graph {
+    position: absolute;
+    top: 88px;
+    left: 926px;
+    width: 580px;
+    height: 370px;
+}
+
+/* CSS For Scale, Legend, and User Preferences*/
+#lower-container {
+    display:flex;
+    flex-direction: row;
+}
+
+#scale-legend-container {
+    border: 2px solid #ccc;
+    padding: 12px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.05);
+    width: 465px;
+    height: 52px;
+    display:flex;
+    position: absolute;
+    left: 40px;
+    top: 745px
+}
+
+#HPI-blurb {
+    border: 2px solid #ccc;
+    padding: 12px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.05);
+    width: 320px;
+    height: 97px;
+    position: absolute;
+    left: 550px;
+    top: 700px
+}
+
+#legend { width: 195px; }
+
+.input-div {
+    position: absolute;
+    left: 40px;
+    top: 700px;
+}
+
 .input-div button {
     margin-left: 10px;
     padding: 6px 12px;
     font-size: 0.9rem;
-  }
+}
+
+#toggle-static-graph {
+    position: absolute;
+    left: 1355px;
+    top: 65px;
+    width: 80px;
+}
   
-.header-title {
-    text-align: center;
-    margin: 20px 0;
-    font-size: 2rem;
-  }

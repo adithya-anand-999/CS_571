@@ -3,7 +3,7 @@
 ## Authors
 Adithya Anand, Blair Huang, Isabella Marino
 
-## Progress Book 
+## Process Book 
 https://docs.google.com/document/d/14G_KiDar4GGV3Y_F_achrRgLeVwDGobJ57sT6AxJOWk/edit?usp=sharing
 
 ## Instructions on how to start and find our code
