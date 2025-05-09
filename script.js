@@ -525,7 +525,8 @@ function generate10YearGraph() {
     let HEIGHT = 375;
     let WIDTH = 500;
     let MARGINS = {left: 60, right: 45, top: 75, bottom: 70};
-    let yAxisValues = [];
+    let yAxisValuesMedian = [];
+    let yAxisValuesMean = [];
 
     // Select the right svg and remove previous data
     let svg = d3.select("#static-graph");
@@ -557,12 +558,14 @@ function generate10YearGraph() {
     .text(medianStatic ? "Median US Prices from 2000-2010" : "Average US Prices from 2000-2010");
 
     // Filter data
-    if (medianStatic) { US_DATA.forEach(instance => yAxisValues.push(instance["Median Price Average"])); }
-    else { US_DATA.forEach(instance => yAxisValues.push(instance["Average Price"])); }
+    US_DATA.forEach(instance => yAxisValuesMedian.push(instance["Median Price Average"]));
+    US_DATA.forEach(instance => yAxisValuesMean.push(instance["Average Price"]));
 
     // Declare y axis
-    let yScale = d3.scaleLinear().domain([d3.min(yAxisValues), d3.max(yAxisValues)]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
-    let yAxis = d3.axisLeft().scale(yScale).tickFormat(d3.format(".3~s"));
+
+    let yScaleMean = d3.scaleLinear().domain([d3.min(yAxisValuesMean), d3.max(yAxisValuesMean)]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
+    let yScaleMedian = d3.scaleLinear().domain([d3.min(yAxisValuesMedian), d3.max(yAxisValuesMedian)]).range([HEIGHT - (MARGINS.top + MARGINS.bottom), 0]);
+    let yAxis = d3.axisLeft().scale(yScaleMean).tickFormat(d3.format(".3~s"));
 
     // Add the y-axis to the svg
     svg.append("g")
@@ -573,29 +576,38 @@ function generate10YearGraph() {
         .attr("x", (0 -(HEIGHT - (MARGINS.top + MARGINS.bottom))/2) - (MARGINS.top + MARGINS.bottom) + 20)
         .attr("y", 15)
         .attr("transform", "rotate(-90)")
-        .text(medianStatic ? "Median Price" : "Average Price");
+        .text("Pricing");
 
     // Create the line generator function
     let medianLineGenerator = d3.line()
                        .x(d => xScale(String(d["Year"])))
-                       .y(d => yScale(d["Median Price Average"]));
+                       .y(d => yScaleMedian(d["Median Price Average"]));
     let avgLineGenerator = d3.line()
                        .x(d => xScale(String(d["Year"])))
-                       .y(d => yScale(d["Average Price"])); 
+                       .y(d => yScaleMean(d["Average Price"])); 
 
     // Create the map visualization using the path and data
     let line = svg.append("g")
                    .attr("id", "us-line")
                    .attr("transform", "translate(" + (MARGINS.left) + "," + MARGINS.top + ")");
 
-    // Create the line
+    // Create the line for median
     line.append("path")
         .datum(US_DATA)
         .attr("class", "line")
-        .style("stroke", medianStatic ? "steelblue" : "#f38000")
+        .style("stroke", "steelblue")
         .style("stroke-width", 2)
         .attr("fill", "none")
-        .attr("d", medianStatic ? medianLineGenerator : avgLineGenerator);
+        .attr("d", medianLineGenerator);
+
+    // Create the line for mean    
+    line.append("path")
+        .datum(US_DATA)
+        .attr("class", "line")
+        .style("stroke", "#f38000")
+        .style("stroke-width", 2)
+        .attr("fill", "none")
+        .attr("d", avgLineGenerator);
 
     // Create points for the lines
     let points = svg.append("g")
