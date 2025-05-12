@@ -1,3 +1,26 @@
+#screencast-link {
+    font-size: 12px;
+    position: absolute;
+    left: 500px;
+    top: 74px;
+
+}
+#process-link {
+    font-size: 12px;
+    position: absolute;
+    left: 430px;
+    top: 58px
+    
+}
+#git-link {
+    font-size: 12px;
+    position: absolute;
+    left: 650px;
+    top: 90px;
+
+    
+}
+
 path {
     fill: none;
     stroke-width: 1px;
@@ -14,9 +37,9 @@ body{
 }
 
 .header-title {
-    text-align: center;
-    margin: 20px 0;
-    font-size: 2rem;
+    position: absolute;
+    left: 355px;
+    top: 8px;
   }
 
 
